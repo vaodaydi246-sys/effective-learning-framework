@@ -10,7 +10,7 @@ Mục tiêu của dự án này là giúp học sinh, sinh viên tối ưu hóa 
 ---
 
 ## 🗺️ Lộ trình Học tập Thông minh (Learning Roadmap)
-
+```
 [ effective-learning-framework (Repo Root) ]
 │
 ├── README.md                      ► Trang chủ hướng dẫn tổng quan hệ thống
@@ -22,6 +22,7 @@ Mục tiêu của dự án này là giúp học sinh, sinh viên tối ưu hóa 
 │
 └── tools/                         ► Bộ công cụ ứng dụng thực tế hỗ trợ
 └── pomodoro-app/              ► Web-app đồng hồ đếm ngược Pomodoro (HTML/JS)
+```
 ---
 
 ## 📂 Chi tiết các Module Phương pháp
