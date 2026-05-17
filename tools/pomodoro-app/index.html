@@ -3,44 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Effective Learning - Advanced Pomodoro Timer</title>
+    <title>Effective Learning - Advanced Pomodoro</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .timer-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
         h1 { color: #2c3e50; font-size: 24px; margin-bottom: 10px; }
-        .status-text { color: #7f8c8d; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .status-text { color: #7f8c8d; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
         
-        /* Cụm nút chọn chế độ thời gian */
+        /* Cụm nút chọn chế độ */
         .mode-container { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 8px; }
-        .mode-btn { background-color: #e0e0e0; border: none; padding: 8px 12px; font-size: 13px; font-weight: bold; border-radius: 20px; cursor: pointer; color: #555; transition: all 0.2s; flex: 1; }
-        .mode-btn.active { background-color: #e74c3c; color: white; }
+        .mode-btn { background-color: #e0e0e0; border: none; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer; color: #555; transition: 0.2s; flex: 1; }
+        .mode-btn:hover { background-color: #d5d5d5; }
+        .mode-btn.active { background-color: #e74c3c; color: white; } /* Màu đỏ mặc định khi chọn */
+        .mode-btn.active.break { background-color: #2ecc71; } /* Màu xanh khi chọn giờ nghỉ */
         
-        .time { font-size: 64px; font-weight: bold; color: #2c3e50; margin: 20px 0; font-variant-numeric: tabular-nums; }
+        .time { font-size: 72px; font-weight: bold; color: #2c3e50; margin: 20px 0; font-variant-numeric: tabular-nums; }
         
         /* Nút Start/Pause */
-        .btn-main { background-color: #2ecc71; color: white; border: none; padding: 12px 30px; font-size: 18px; border-radius: 25px; cursor: pointer; transition: background 0.2s; width: 100%; font-weight: bold; }
+        .btn-main { background-color: #2ecc71; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 30px; cursor: pointer; transition: background 0.2s; width: 100%; font-weight: bold; }
         .btn-main:hover { background-color: #27ae60; }
     </style>
 </head>
 <body>
     <div class="timer-card">
-        <h1>🎯 ELF Pomodoro Timer</h1>
-        <div class="status-text" id="status">Sẵn sàng học tập</div>
+        <h1>🎯 ELF Pomodoro</h1>
+        <div class="status-text" id="status">SẴN SÀNG HỌC TẬP</div>
         
         <div class="mode-container">
-            <button class="mode-btn active" id="btn-pomodoro" onclick="setMode('pomodoro', 25, 'Sẵn sàng học tập')">25m Pomodoro</button>
-            <button class="mode-btn" id="btn-short" onclick="setMode('short', 5, 'Giờ nghỉ giải lao')">5m Break</button>
-            <button class="mode-btn" id="btn-long" onclick="setMode('long', 15, 'Nghỉ ngơi thư giãn')">15m Long Break</button>
+            <button class="mode-btn active" id="btn-pomodoro" onclick="setMode('pomodoro', 25, 'Sẵn sàng học tập')">25m Học</button>
+            <button class="mode-btn" id="btn-short" onclick="setMode('short', 5, 'Nghỉ giải lao ngắn')">5m Nghỉ</button>
+            <button class="mode-btn" id="btn-long" onclick="setMode('long', 15, 'Nghỉ ngơi dài')">15m Nghỉ</button>
         </div>
 
         <div class="time" id="timer">25:00</div>
-        <button class="btn-main" id="startBtn" onclick="toggleTimer()">Bắt Đầu</button>
+        <button class="btn-main" id="startBtn" onclick="toggleTimer()">BẮT ĐẦU</button>
     </div>
 
     <script>
         let timeLeft = 25 * 60;
         let timerId = null;
-        let currentMode = 'pomodoro';
 
         function updateTimerDisplay() {
             let minutes = Math.floor(timeLeft / 60);
@@ -48,56 +49,64 @@
             document.getElementById('timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // Hàm xử lý khi bấm chuyển đổi qua lại giữa các nút thời gian
+        // Hàm chuyển đổi chế độ an toàn
         function setMode(mode, minutes, statusText) {
-            // Dừng đồng hồ lại nếu đang chạy
-            if (timerId !== null) {
-                toggleTimer();
-            }
-            
-            currentMode = mode;
+            // 1. Reset và dừng đồng hồ hiện tại
+            clearInterval(timerId);
+            timerId = null;
+            document.getElementById('startBtn').textContent = "BẮT ĐẦU";
+            document.getElementById('startBtn').style.backgroundColor = "#2ecc71";
+
+            // 2. Cập nhật thời gian mới
             timeLeft = minutes * 60;
             document.getElementById('status').textContent = statusText;
             updateTimerDisplay();
 
-            // Đổi màu nút được chọn
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btn-${mode}`).classList.add('active');
+            // 3. Reset giao diện các nút
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('break');
+            });
+
+            // 4. Kích hoạt nút bấm tương ứng
+            let activeBtn = document.getElementById(`btn-${mode}`);
+            activeBtn.classList.add('active');
             
-            // Đổi màu chữ số theo chế độ (Đỏ cho Pomodoro, Xanh cho giờ nghỉ)
-            if (mode === 'pomodoro') {
-                document.getElementById('btn-pomodoro').style.backgroundColor = '#e74c3c';
-                document.getElementById('timer').style.color = '#2c3e50';
+            // Nếu là chế độ nghỉ, đổi nút sang màu xanh
+            if (mode !== 'pomodoro') {
+                activeBtn.classList.add('break');
+                document.getElementById('timer').style.color = '#2ecc71'; // Giờ màu xanh
             } else {
-                document.getElementById('timer').style.color = '#2ecc71';
+                document.getElementById('timer').style.color = '#2c3e50'; // Giờ màu đen
             }
         }
 
         function toggleTimer() {
             if (timerId === null) {
-                document.getElementById('startBtn').textContent = "Tạm Dừng";
-                document.getElementById('startBtn').style.backgroundColor = "#e67e22";
+                // Đang dừng -> Bấm để Chạy
+                document.getElementById('startBtn').textContent = "TẠM DỪNG";
+                document.getElementById('startBtn').style.backgroundColor = "#e67e22"; // Màu cam
+                
                 timerId = setInterval(() => {
                     if (timeLeft > 0) { 
                         timeLeft--; 
                         updateTimerDisplay(); 
                     } else { 
+                        // Hết giờ
                         clearInterval(timerId); 
                         timerId = null;
-                        alert("Hết thời gian! Hãy chọn chế độ tiếp theo."); 
-                        resetControls();
+                        document.getElementById('startBtn').textContent = "BẮT ĐẦU";
+                        document.getElementById('startBtn').style.backgroundColor = "#2ecc71";
+                        alert("⏳ Đã hết thời gian! Chuyển sang bước tiếp theo nào."); 
                     }
                 }, 1000);
             } else {
+                // Đang chạy -> Bấm để Dừng
                 clearInterval(timerId);
                 timerId = null;
-                resetControls();
+                document.getElementById('startBtn').textContent = "TIẾP TỤC";
+                document.getElementById('startBtn').style.backgroundColor = "#3498db"; // Màu xanh dương
             }
-        }
-
-        function resetControls() {
-            document.getElementById('startBtn').textContent = "Bắt Đầu";
-            document.getElementById('startBtn').style.backgroundColor = "#2ecc71";
         }
     </script>
 </body>
