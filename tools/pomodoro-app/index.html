@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Effective Learning - Advanced Pomodoro - Custom Background</title>
+    <title>Effective Learning - Advanced Pomodoro - Aesthetic Scenery</title>
     <style>
-        /* Thiết lập các chủ đề nền (Theme) dạng biến CSS */
+        /* Thiết lập nền mặc định ban đầu */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             display: flex; 
@@ -13,78 +13,66 @@
             align-items: center; 
             height: 100vh; 
             margin: 0; 
-            transition: background 0.8s ease;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background 1s ease-in-out;
             position: relative;
             overflow: hidden;
         }
 
-        /* Các class tương ứng với từng loại nền */
-        body.theme-rainbow {
-            background: linear-gradient(-45deg, #ff416c, #ff4b2b, #11998e, #38ef7d);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-        body.theme-cyberpunk {
-            background: linear-gradient(135deg, #0f0c20 0%, #15102a 40%, #631257 100%);
-        }
-        body.theme-sunset {
-            background: linear-gradient(135deg, #f12711, #f5af19);
-        }
-        body.theme-frost {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-        }
-        body.theme-minimal {
-            background: #eef2f3;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* --- MENU CHỌN NỀN (Nằm góc trên cùng) --- */
+        /* --- MENU CHỌN NỀN PHONG CẢNH --- */
         .bg-selector-container {
             position: absolute;
             top: 20px;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
             border-radius: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            backdrop-filter: blur(5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             z-index: 10;
+            border: 1px solid rgba(255,255,255,0.5);
         }
         .bg-selector-container span {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
-            color: #444;
+            color: #2c3e50;
         }
         .bg-select {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 5px 10px;
+            background: #f8f9fa;
+            border: 1px solid #ced4da;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
-            color: #333;
+            color: #495057;
             cursor: pointer;
             outline: none;
+            transition: all 0.2s;
+        }
+        .bg-select:hover {
+            background: #e9ecef;
         }
 
-        /* Thẻ chứa Pomodoro (Glassmorphism) */
+        /* Thẻ chứa Pomodoro dạng Kính cường lực cao cấp */
         .timer-card { 
-            background: rgba(255, 255, 255, 0.9); 
+            background: rgba(255, 255, 255, 0.85); 
             padding: 40px; 
             border-radius: 25px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 0 30px rgba(255,255,255,0.5) inset; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.5) inset; 
             text-align: center; 
             max-width: 400px; 
             width: 100%; 
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+        .timer-card:hover {
+            transform: translateY(-5px);
         }
 
         h1 { 
@@ -97,8 +85,8 @@
         }
 
         .status-text { 
-            color: #ff6b6b; 
-            font-size: 14px; 
+            color: #e74c3c; 
+            font-size: 13px; 
             margin-bottom: 25px; 
             text-transform: uppercase; 
             letter-spacing: 2px; 
@@ -108,24 +96,24 @@
         .mode-container { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 10px; }
         
         .mode-btn { 
-            background-color: #f0f0f0; 
-            border: 2px solid transparent; 
+            background-color: rgba(0,0,0,0.05); 
+            border: none; 
             padding: 12px 10px; 
             font-size: 13px; 
             font-weight: bold; 
             border-radius: 12px; 
             cursor: pointer; 
-            color: #666; 
+            color: #555; 
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             flex: 1; 
         }
         
         .mode-btn:hover { 
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background-color: rgba(0,0,0,0.1);
         }
 
-        /* Màu riêng của từng nút khi Active */
+        /* Màu rực rỡ khi nút Active */
         .mode-btn.active#btn-pomodoro { 
             background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); 
             color: white;
@@ -145,10 +133,10 @@
         }
         
         .time { 
-            font-size: 80px; 
+            font-size: 84px; 
             font-weight: 900; 
             color: #ff0844; 
-            margin: 15px 0 30px 0; 
+            margin: 10px 0 25px 0; 
             font-variant-numeric: tabular-nums; 
             text-shadow: 2px 4px 10px rgba(0,0,0,0.15);
             transition: color 0.4s ease;
@@ -170,24 +158,21 @@
         }
         
         .btn-main:hover { 
-            transform: scale(1.03);
+            transform: scale(1.02);
             box-shadow: 0 8px 25px rgba(56, 239, 125, 0.6);
         }
-        .btn-main:active { transform: scale(0.98); }
     </style>
 </head>
-<!-- Mặc định ban đầu dùng nền Cầu vồng rực rỡ -->
-<body class="theme-rainbow">
+<body>
 
-    <!-- Thanh Menu chọn hình nền -->
+    <!-- Menu chọn hình nền phong cảnh nghệ thuật -->
     <div class="bg-selector-container">
-        <span>🖼️ Đổi nền:</span>
+        <span>🏞️ Chọn phong cảnh:</span>
         <select class="bg-select" id="bgSelect" onchange="changeBackground()">
-            <option value="theme-rainbow">🌈 Cầu vồng động</option>
-            <option value="theme-cyberpunk">🔮 Neon Tím Đêm</option>
-            <option value="theme-sunset">🌅 Cam Hoàng Hôn</option>
-            <option value="theme-frost">❄️ Xanh Băng Giá</option>
-            <option value="theme-minimal">⚪ Tối giản (Xám)</option>
+            <option value="cozy">📚 Phòng học ấm cúng (Lofi)</option>
+            <option value="cyberpunk">🔮 Neon Đêm Mưa (Cyberpunk)</option>
+            <option value="sunset">🌅 Thung lũng hoàng hôn (Aesthetic)</option>
+            <option value="gradient">🌈 Cầu vồng Gradient động</option>
         </select>
     </div>
 
@@ -209,15 +194,50 @@
         let timeLeft = 25 * 60;
         let timerId = null;
 
-        // Hàm xử lý đổi hình nền khi người dùng chọn menu
+        // Lưu trữ danh sách URL ảnh phong cảnh chất lượng cao từ thư viện hình ảnh công cộng
+        const backgrounds = {
+            cozy: "url('https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcRK9zo7EamshLlPZtXGikt5CSN-EcD6OJHwh8qPexN3PNHudKejLfg3KxNIfpK5jiVETYaA5A1zyD0zvX0')",
+            cyberpunk: "url('https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcTHn0NgSRjkjKdvclWXLCrL0Uz_aLQlC691lMM9Wqs9bTty65SPhdOVJWP2Iab_KZ-tXCGWY-vMYOR_gJo')",
+            sunset: "url('https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcTBJZlLQ-q1AhByVCPnBBl2A5vb1TUTGIVK7J9F6P5yLIXEKDA4A_cS8Dod-YFeSyEhMk__aZ7kdVSpaJw')",
+            gradient: "linear-gradient(-45deg, #ff416c, #ff4b2b, #11998e, #38ef7d)"
+        };
+
+        // Hàm thay đổi hình nền
         function changeBackground() {
-            const select = document.getElementById('bgSelect');
-            const selectedTheme = select.value;
+            const selectedKey = document.getElementById('bgSelect').value;
+            const body = document.body;
             
-            // Xóa hết các class nền cũ và gán class mới cho thẻ body
-            document.body.className = ''; 
-            document.body.classList.add(selectedTheme);
+            // Xóa hiệu ứng animation cũ nếu có
+            body.style.animation = 'none';
+            body.style.backgroundSize = 'cover';
+
+            if (selectedKey === 'gradient') {
+                body.style.background = backgrounds[selectedKey];
+                body.style.backgroundSize = '400% 400%';
+                // Tự viết hàm kích hoạt lại keyframes mượt mà
+                setTimeout(() => {
+                    body.style.animation = 'gradientAnimation 15s ease infinite';
+                }, 10);
+            } else {
+                body.style.backgroundImage = backgrounds[selectedKey];
+            }
         }
+
+        // Thêm một style block động cho animation gradient khi cần thiết
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes gradientAnimation {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Thiết lập hình nền mặc định ban đầu ngay khi tải trang
+        window.onload = function() {
+            changeBackground();
+        };
 
         function updateTimerDisplay() {
             let minutes = Math.floor(timeLeft / 60);
