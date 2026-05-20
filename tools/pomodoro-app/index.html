@@ -3,25 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Effective Learning - Advanced Pomodoro</title>
+    <title>Effective Learning - Advanced Pomodoro - Colorful Edition</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .timer-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
-        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 10px; }
-        .status-text { color: #7f8c8d; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
+        /* Nền dải màu gradient chuyển động rực rỡ */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(-45deg, #ff416c, #ff4b2b, #11998e, #38ef7d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Thẻ chứa được thiết kế dạng kính (Glassmorphism) cực kỳ bắt mắt */
+        .timer-card { 
+            background: rgba(255, 255, 255, 0.9); 
+            padding: 40px; 
+            border-radius: 25px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.5) inset; 
+            text-align: center; 
+            max-width: 400px; 
+            width: 100%; 
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Đổi màu chữ tiêu đề thành gradient neon */
+        h1 { 
+            background: linear-gradient(45deg, #ff0844, #ffb199);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 28px; 
+            margin-bottom: 5px; 
+            font-weight: 800;
+        }
+
+        .status-text { 
+            color: #ff6b6b; 
+            font-size: 14px; 
+            margin-bottom: 25px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
         
-        /* Cụm nút chọn chế độ */
-        .mode-container { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 8px; }
-        .mode-btn { background-color: #e0e0e0; border: none; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer; color: #555; transition: 0.2s; flex: 1; }
-        .mode-btn:hover { background-color: #d5d5d5; }
-        .mode-btn.active { background-color: #e74c3c; color: white; } /* Màu đỏ mặc định khi chọn */
-        .mode-btn.active.break { background-color: #2ecc71; } /* Màu xanh khi chọn giờ nghỉ */
+        /* Cụm nút chọn chế độ đầy màu sắc */
+        .mode-container { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 10px; }
         
-        .time { font-size: 72px; font-weight: bold; color: #2c3e50; margin: 20px 0; font-variant-numeric: tabular-nums; }
+        .mode-btn { 
+            background-color: #f0f0f0; 
+            border: 2px solid transparent; 
+            padding: 12px 10px; 
+            font-size: 13px; 
+            font-weight: bold; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            color: #666; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            flex: 1; 
+        }
         
-        /* Nút Start/Pause */
-        .btn-main { background-color: #2ecc71; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 30px; cursor: pointer; transition: background 0.2s; width: 100%; font-weight: bold; }
-        .btn-main:hover { background-color: #27ae60; }
+        .mode-btn:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Màu sắc rực rỡ riêng biệt cho từng nút khi được kích hoạt */
+        .mode-btn.active#btn-pomodoro { 
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); 
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 8, 68, 0.4);
+        } 
+        
+        .mode-btn.active#btn-short { 
+            background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); 
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 114, 255, 0.4);
+        }
+
+        .mode-btn.active#btn-long { 
+            background: linear-gradient(135deg, #f12711 0%, #f5af19 100%); 
+            color: white;
+            box-shadow: 0 5px 15px rgba(245, 175, 25, 0.4);
+        }
+        
+        /* Số đồng hồ siêu to khổng lồ và sắc nét */
+        .time { 
+            font-size: 80px; 
+            font-weight: 900; 
+            color: #ff0844; /* Đỏ rực rỡ mặc định */
+            margin: 15px 0 30px 0; 
+            font-variant-numeric: tabular-nums; 
+            text-shadow: 2px 4px 10px rgba(0,0,0,0.15);
+            transition: color 0.4s ease;
+        }
+        
+        /* Nút Điều khiển chính với hiệu ứng đổi màu sặc sỡ */
+        .btn-main { 
+            background: linear-gradient(45deg, #11998e, #38ef7d); /* Xanh lá rực rỡ ban đầu */
+            color: white; 
+            border: none; 
+            padding: 18px 30px; 
+            font-size: 20px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            width: 100%; 
+            font-weight: bold; 
+            letter-spacing: 1px;
+            box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+        }
+        
+        .btn-main:hover { 
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(56, 239, 125, 0.6);
+        }
+
+        .btn-main:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -49,63 +159,68 @@
             document.getElementById('timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // Hàm chuyển đổi chế độ an toàn
         function setMode(mode, minutes, statusText) {
-            // 1. Reset và dừng đồng hồ hiện tại
             clearInterval(timerId);
             timerId = null;
-            document.getElementById('startBtn').textContent = "BẮT ĐẦU";
-            document.getElementById('startBtn').style.backgroundColor = "#2ecc71";
+            
+            // Reset nút chính về trạng thái BẮT ĐẦU sặc sỡ ban đầu
+            const startBtn = document.getElementById('startBtn');
+            startBtn.textContent = "BẮT ĐẦU";
+            startBtn.style.background = "linear-gradient(45deg, #11998e, #38ef7d)";
+            startBtn.style.boxShadow = "0 6px 20px rgba(56, 239, 125, 0.4)";
 
-            // 2. Cập nhật thời gian mới
             timeLeft = minutes * 60;
             document.getElementById('status').textContent = statusText;
             updateTimerDisplay();
 
-            // 3. Reset giao diện các nút
+            // Loại bỏ class active của tất cả các nút
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('active');
-                btn.classList.remove('break');
             });
 
-            // 4. Kích hoạt nút bấm tương ứng
+            // Kích hoạt nút tương ứng
             let activeBtn = document.getElementById(`btn-${mode}`);
             activeBtn.classList.add('active');
             
-            // Nếu là chế độ nghỉ, đổi nút sang màu xanh
-            if (mode !== 'pomodoro') {
-                activeBtn.classList.add('break');
-                document.getElementById('timer').style.color = '#2ecc71'; // Giờ màu xanh
+            // Thay đổi màu sắc của chữ số đồng hồ linh hoạt theo từng chế độ
+            const timerDisplay = document.getElementById('timer');
+            if (mode === 'pomodoro') {
+                timerDisplay.style.color = '#ff0844'; // Đỏ neon cho lúc học
+            } else if (mode === 'short') {
+                timerDisplay.style.color = '#0072ff'; // Xanh dương tươi mát cho nghỉ ngắn
             } else {
-                document.getElementById('timer').style.color = '#2c3e50'; // Giờ màu đen
+                timerDisplay.style.color = '#f12711'; // Cam cháy năng lượng cho nghỉ dài
             }
         }
 
         function toggleTimer() {
+            const startBtn = document.getElementById('startBtn');
             if (timerId === null) {
-                // Đang dừng -> Bấm để Chạy
-                document.getElementById('startBtn').textContent = "TẠM DỪNG";
-                document.getElementById('startBtn').style.backgroundColor = "#e67e22"; // Màu cam
+                // Đang dừng -> Bấm để Chạy (Đổi sang màu Cam Sunset rực rỡ)
+                startBtn.textContent = "TẠM DỪNG";
+                startBtn.style.background = "linear-gradient(45deg, #f12711, #f5af19)"; 
+                startBtn.style.boxShadow = "0 6px 20px rgba(245, 175, 25, 0.4)";
                 
                 timerId = setInterval(() => {
                     if (timeLeft > 0) { 
                         timeLeft--; 
                         updateTimerDisplay(); 
                     } else { 
-                        // Hết giờ
                         clearInterval(timerId); 
                         timerId = null;
-                        document.getElementById('startBtn').textContent = "BẮT ĐẦU";
-                        document.getElementById('startBtn').style.backgroundColor = "#2ecc71";
+                        startBtn.textContent = "BẮT ĐẦU";
+                        startBtn.style.background = "linear-gradient(45deg, #11998e, #38ef7d)";
+                        startBtn.style.boxShadow = "0 6px 20px rgba(56, 239, 125, 0.4)";
                         alert("⏳ Đã hết thời gian! Chuyển sang bước tiếp theo nào."); 
                     }
                 }, 1000);
             } else {
-                // Đang chạy -> Bấm để Dừng
+                // Đang chạy -> Bấm để Tạm dừng (Đổi sang màu Xanh lơ / Tím mộng mơ)
                 clearInterval(timerId);
                 timerId = null;
-                document.getElementById('startBtn').textContent = "TIẾP TỤC";
-                document.getElementById('startBtn').style.backgroundColor = "#3498db"; // Màu xanh dương
+                startBtn.textContent = "TIẾP TỤC";
+                startBtn.style.background = "linear-gradient(45deg, #8a2387, #e94057, #f27121)"; 
+                startBtn.style.boxShadow = "0 6px 20px rgba(233, 64, 87, 0.4)";
             }
         }
     </script>
