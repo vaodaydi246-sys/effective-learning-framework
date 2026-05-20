@@ -3,152 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flocus Minimal Pomodoro</title>
+    <title>Flocus Minimalist Pomodoro</title>
     <style>
-        /* --- ĐỊNH DẠNG CHUNG --- */
+        /* --- CSS RESET & BASE --- */
         body {
             margin: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #1e1e1e url('https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1920') no-repeat center center/cover;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: white;
+            background: #1a1a1a url('image_addb50.png') no-repeat center center/cover;
+            transition: background 0.8s ease;
             overflow: hidden;
-            transition: background-image 0.5s ease;
         }
 
-        /* Lớp phủ tối mờ để số và chữ luôn nổi bật, dễ nhìn */
-        body::before {
-            content: '';
+        /* Lớp phủ tối mờ - pointer-events: none để không chặn click */
+        .bg-overlay {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.45);
             z-index: 1;
-            /* ĐÂY LÀ PHẦN FIX LỖI: Cho phép click chuột xuyên qua lớp phủ */
-            pointer-events: none; 
+            pointer-events: none;
         }
 
-        /* --- BỘ ĐẾM GIỜ TRUNG TÂM --- */
-        .main-timer-container {
+        /* --- MENU 3 GẠCH & SIDEBAR --- */
+        .menu-toggle {
+            position: absolute;
+            top: 25px; right: 25px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 24px;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0; right: -350px;
+            width: 320px; height: 100vh;
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 101;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        .sidebar.open { right: 0; }
+
+        .sidebar h2 { margin-top: 0; font-size: 22px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .setting-item { margin-bottom: 20px; }
+        .setting-item label { display: block; font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        .setting-item input, .setting-item select {
+            width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 8px; outline: none;
+        }
+
+        .btn-apply {
+            width: 100%; padding: 12px; background: white; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;
+        }
+
+        /* --- GIAO DIỆN CHÍNH --- */
+        .main-container {
             position: relative;
-            z-index: 2;
+            z-index: 10;
             text-align: center;
-            height: 300px; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        .mode-switcher {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-bottom: 20px;
+        .tabs {
+            display: flex; gap: 30px; margin-bottom: 20px;
             transition: opacity 0.4s ease;
         }
-        .mode-btn {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 5px 0;
-            transition: all 0.3s ease;
-            position: relative;
+        .tab-btn {
+            background: none; border: none; color: rgba(255,255,255,0.5);
+            font-size: 16px; font-weight: 500; cursor: pointer; padding: 5px 0;
+            position: relative; transition: color 0.3s;
         }
-        .mode-btn:hover, .mode-btn.active { color: #fff; }
-        .mode-btn.active::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
-            background: white; border-radius: 2px;
+        .tab-btn.active { color: white; }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: white;
         }
 
-        /* Con số thời gian khổng lồ */
-        .time-display {
-            font-size: 140px;
+        .timer-display {
+            font-size: 150px;
             font-weight: 700;
             line-height: 1;
-            margin: 10px 0 30px 0;
-            letter-spacing: -2px;
+            margin: 20px 0;
             font-variant-numeric: tabular-nums;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .action-wrapper {
-            height: 50px;
+        .controls {
             transition: opacity 0.4s ease;
+            height: 60px;
         }
-        .action-btn {
-            background: white;
-            color: black;
-            border: none;
-            padding: 12px 45px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 30px;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: transform 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        .start-btn {
+            background: white; color: black; border: none; padding: 15px 50px;
+            font-size: 18px; font-weight: 600; border-radius: 40px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .action-btn:hover { transform: scale(1.05); }
 
-        /* =========================================
-           HIỆU ỨNG KHI BẮT ĐẦU ĐẾM GIỜ (FOCUS MODE)
-           ========================================= */
-        .main-timer-container.focus-mode .mode-switcher,
-        .main-timer-container.focus-mode .action-wrapper {
+        /* --- TRẠNG THÁI FOCUS (KHI CHẠY) --- */
+        .is-running .tabs, .is-running .start-btn {
             opacity: 0;
             pointer-events: none;
         }
-        
-        .main-timer-container.focus-mode:hover .action-wrapper {
+        /* Di chuột vào vùng trung tâm để hiện lại nút Pause */
+        .main-container:hover .start-btn {
             opacity: 1;
             pointer-events: auto;
         }
+        
+        /* Ẩn menu 3 gạch khi đang chạy để cực kỳ tập trung */
+        body.is-running .menu-toggle { opacity: 0; pointer-events: none; }
 
-        /* --- NÚT BÁNH RĂNG VÀ SIDEBAR CÀI ĐẶT --- */
-        .settings-toggle-btn {
-            position: absolute;
-            top: 30px; right: 30px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white; font-size: 20px;
-            width: 45px; height: 45px;
-            border-radius: 50%; cursor: pointer; z-index: 10;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px); transition: background 0.3s ease;
-        }
-        .settings-toggle-btn:hover { background: rgba(255, 255, 255, 0.3); }
+    </style>
+</head>
+<body id="body">
 
-        .sidebar-settings {
-            position: fixed;
-            top: 0; right: -350px; width: 320px; height: 100vh;
-            background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(20px);
-            box-shadow: -5px 0 30px rgba(0,0,0,0.5); z-index: 100;
-            padding: 30px; box-sizing: border-box;
-            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow-y: auto;
-        }
-        .sidebar-settings.open { right: 0; }
+    <div class="bg-overlay"></div>
 
-        .sidebar-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
-        }
-        .sidebar-header h3 { margin: 0; font-size: 20px; }
-        .close-sidebar-btn { background: none; border: none; color: #aaa; font-size: 28px; cursor: pointer; }
-        .close-sidebar-btn:hover { color: white; }
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
-        .setting-group { margin-bottom: 20px; }
-        .setting-group label {
-            display: block; font-size: 12px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+    <div class="sidebar" id="sidebar">
+        <h2 id="lang-settings">Settings</h2>
+        <button onclick="toggleSidebar()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+        
+        <div class="setting-item">
+            <label id="lang-label">Language</label>
+            <select id="select-lang" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="vi">Tiếng Việt</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <label id="lang-pomo">Pomodoro (Min)</label>
+            <input type="number" id="in-pomo" value="25">
+        </div>
+        <div class="setting-item">
+            <label id="lang-short">Short Break (Min)</label>
+            <input type="number" id="in-short" value="5">
+        </div>
+        <div class="setting-item">
+            <label id="lang-long">Long Break (Min)</label>
+            <input type="number" id="in-long" value="15">
+        </div>
+
+        <div class="setting-item">
+            <label id="lang-bg">Background</label>
+            <select id="select-bg" onchange="changeBg(this.value)">
+                <option value="image_addb50.png">Purple Forest</option>
+                <option value="image_addb6c.png">Anime Sky</option>
+                <option value="image_addbc5.jpg">Lofi Cabin</option>
+                <option value="image_addbcd.jpg">Pastel Beach</option>
+                <option value="image_ade2d1.jpg">Cherry Blossom</option>
+                <option value="image_ade311.png">Lofi Train</option>
+            </select>
+        </div>
+
+        <button class="btn-apply" onclick="applySettings()" id="lang-apply">Apply</button>
+    </div>
+
+    <div class="main-container" id="main-container">
+        <div class="tabs" id="tabs">
+            <button class="tab-btn active" id="tab-pomo" onclick="setMode('pomo')">Pomodoro</button>
+            <button class="tab-btn" id="tab-short" onclick="setMode('short')">Short Break</button>
+            <button class="tab-btn" id="tab-long" onclick="setMode('long')">Long Break</button>
+        </div>
+
+        <div class="timer-display" id="display">25:00</div>
+
+        <div class="controls">
+            <button class="start-btn" id="start-btn" onclick="toggleTimer()">START</button>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu ngôn ngữ
+        const i18n = {
+            en: {
+                settings: "Settings", lang: "Language", apply: "Apply",
+                pomo: "Pomodoro (Min)", short: "Short Break (Min)", long: "Long Break (Min)",
+                bg: "Background", start: "START", pause: "PAUSE",
+                tabPomo: "Pomodoro", tabShort: "Short Break", tabLong: "Long Break"
+            },
+            vi: {
+                settings: "Cài đặt", lang: "Ngôn ngữ", apply: "Áp dụng",
+                pomo: "Học tập (Phút)", short: "Nghỉ ngắn (Phút)", long: "Nghỉ dài (Phút)",
+                bg: "Hình nền", start: "BẮT ĐẦU", pause: "TẠM DỪNG",
+                tabPomo: "Học tập", tabShort: "Nghỉ ngắn", tabLong: "Nghỉ dài"
+            }
+        };
+
+        let currentLang = 'en';
+        let durations = { pomo: 25, short: 5, long: 15 };
+        let currentMode = 'pomo';
+        let timeLeft = 25 * 60;
+        let timer = null;
+
+        // Sidebar
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+        // Background
+        function changeBg(val) { document.getElementById('body').style.backgroundImage = `url('${val}')`; }
+
+        // Cài đặt
+        function applySettings() {
+            durations.pomo = parseInt(document.getElementById('in-pomo').value);
+            durations.short = parseInt(document.getElementById('in-short').value);
+            durations.long = parseInt(document.getElementById('in-long').value);
+            setMode(currentMode);
+            toggleSidebar();
         }
-        .setting-group input[type="number"], .setting-group select {
-            width: 100%; padding: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box;
+
+        // Ngôn ngữ
+        function changeLanguage() {
+            currentLang = document.getElementById('select-lang').value;
+            const lang = i18n[currentLang];
+            document.getElementById('lang-settings').innerText = lang.settings;
+            document.getElementById('lang-label').innerText = lang.lang;
+            document.getElementById('lang-pomo').innerText = lang.pomo;
+            document.getElementById('lang-short').innerText = lang.short;
+            document.getElementById('lang-long').innerText = lang.long;
+            document.getElementById('lang-bg').innerText = lang.bg;
+            document.getElementById('lang-apply').innerText = lang.apply;
+            document.getElementById('start-btn').innerText = timer ? lang.pause : lang.start;
+            document.getElementById('tab-pomo').innerText = lang.tabPomo;
+            document.getElementById('tab-short').innerText = lang.tabShort;
+            document.getElementById('tab-long').innerText = lang.tabLong;
         }
-        .setting-group input:focus, .setting-group select:focus { outline: none; border-
+
+        // Timer Logic
+        function setMode(mode) {
+            if (timer) toggleTimer();
+            currentMode = mode;
+            timeLeft = durations[mode] * 60;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${mode}`).classList.add('active');
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('start-btn');
+            const container = document.getElementById('main-container');
+            const body = document.getElementById('body');
+
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+                btn.innerText = i18n[currentLang].start;
+                container.classList.remove('is-running');
+                body.classList.remove('is-running');
+            } else {
+                container.classList.add('is-running');
+                body.classList.add('is-running');
+                btn.innerText = i18n[currentLang].pause;
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        alert("Time's up!");
+                        setMode(currentMode);
+                    }
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
