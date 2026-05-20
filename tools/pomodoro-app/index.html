@@ -19,7 +19,7 @@
             transition: background-image 0.5s ease;
         }
 
-        /* Lớp phủ tối mờ để số luôn nổi bật */
+        /* Lớp phủ tối mờ để số và chữ luôn nổi bật, dễ nhìn */
         body::before {
             content: '';
             position: absolute;
@@ -97,12 +97,14 @@
         /* =========================================
            HIỆU ỨNG KHI BẮT ĐẦU ĐẾM GIỜ (FOCUS MODE)
            ========================================= */
+        /* Ẩn sạch các nút khi đang đếm giờ */
         .main-timer-container.focus-mode .mode-switcher,
         .main-timer-container.focus-mode .action-wrapper {
             opacity: 0;
             pointer-events: none;
         }
         
+        /* Hiển thị lại nút Pause khi di chuột vào màn hình */
         .main-timer-container.focus-mode:hover .action-wrapper {
             opacity: 1;
             pointer-events: auto;
@@ -197,13 +199,12 @@
             <label id="txt-bg-label">Background Space</label>
             <select id="select-bg">
                 <option value="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1920">🏔️ Swiss Alps (Default)</option>
-                <option value="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1920">🌌 Starry Night Chill</option>
-                <option value="https://images.unsplash.com/photo-1616091093714-c64882e9ab55?q=80&w=1920">📻 Cozy Lofi Room</option>
-                <option value="https://images.unsplash.com/photo-1554147090-e1221a04a025?q=80&w=1920">🌃 Neon Vibes</option>
-                <option value="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?q=80&w=1920">🪵 Wood Desk Workspace</option>
+                <option value="https://images.unsplash.com/photo-1518481612222-68bab828fd1d?q=80&w=1920">🎮 Cozy Retro Room</option>
+                <option value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1920">📻 Lofi Vinyl Vibes</option>
+                <option value="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=1920">🌃 Neon Cyberpunk</option>
                 <option value="https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=1920">🌧️ Rainy Window</option>
-                <option value="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1920">🚀 Deep Space</option>
-                <option value="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=1920">👾 Retro Arcade Aesthetic</option>
+                <option value="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=1920">🌿 Minimalist Desk</option>
+                <option value="https://images.unsplash.com/photo-1506744626753-143d4eb38977?q=80&w=1920">🌅 Sunset Chill</option>
             </select>
         </div>
 
@@ -308,6 +309,7 @@
             
             document.getElementById('actionBtn').textContent = langData[currentLang].start;
             
+            // Xóa class focus-mode để hiển thị lại tất cả các nút
             document.getElementById('timerContainer').classList.remove('focus-mode');
             document.getElementById('openSettingsBtn').style.display = 'flex';
         }
@@ -326,9 +328,11 @@
                 timerRunning = true;
                 actionBtn.textContent = langData[currentLang].pause;
                 
+                // Ẩn nút cài đặt
                 document.getElementById('openSettingsBtn').style.display = 'none';
                 sidebar.classList.remove('open');
                 
+                // Kích hoạt Focus Mode: ẩn sạch chữ và nút, chỉ chừa lại số
                 timerContainer.classList.add('focus-mode');
 
                 countdownInterval = setInterval(() => {
