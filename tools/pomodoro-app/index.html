@@ -3,282 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimal Pomodoro</title>
+    <title>Flocus Style Pomodoro</title>
     <style>
+        /* --- ĐỊNH DẠNG CHUNG (CHUẨN FLOCUS) --- */
         body {
             margin: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #2c3e50 url('https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1920') no-repeat center center/cover;
-            transition: background-image 0.5s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Hình nền mặc định tối mờ lãng mạn */
+            background: #1e1e1e url('https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1920') no-repeat center center/cover;
+            color: white;
             overflow: hidden;
+            transition: background-image 0.5s ease;
         }
 
-        /* --- NÚT 3 GẠCH GÓC TRÊN PHẢI --- */
-        .menu-hamburger {
+        /* Lớp phủ mờ đè lên ảnh nền giúp nhìn rõ chữ */
+        body::before {
+            content: '';
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 1;
+        }
+
+        /* --- BỘ ĐẾM GIỜ TRUNG TÂM --- */
+        .main-timer-container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            /* Hoàn toàn loại bỏ khung viền trắng, chỉ có chữ nổi trên nền ảnh */
+        }
+
+        /* Nút chuyển chế độ dạng chữ trần */
+        .mode-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 10px;
+        }
+        .mode-btn {
+            background: none;
             border: none;
-            font-size: 24px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .mode-btn:hover, .mode-btn.active {
+            color: #fff;
+        }
+        /* Gạch chân nhỏ dưới nút đang chọn */
+        .mode-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 2px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        /* Con số thời gian khổng lồ đặc trưng */
+        .time-display {
+            font-size: 120px;
+            font-weight: 700;
+            line-height: 1;
+            margin: 15px 0 30px 0;
+            letter-spacing: -2px;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Nút START/PAUSE tối giản */
+        .action-btn {
+            background: white;
+            color: black;
+            border: none;
+            padding: 12px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: #f0f0f0;
+        }
+
+        /* --- NÚT BÁNH RĂNG CÀI ĐẶT GÓC PHẢI --- */
+        .settings-toggle-btn {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 20px;
             width: 45px;
             height: 45px;
             border-radius: 50%;
             cursor: pointer;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            transition: background 0.3s ease;
+        }
+        .settings-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- SIDEBAR CÀI ĐẶT TRƯỢT TỪ CẠNH PHẢI VÀO --- */
+        .sidebar-settings {
+            position: fixed;
+            top: 0;
+            right: -350px; /* Ban đầu giấu ngoài màn hình */
+            width: 300px;
+            height: 100vh;
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(20px);
+            box-shadow: -5px 0 30px rgba(0,0,0,0.5);
             z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            box-sizing: border-box;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+        }
+        /* Lớp kích hoạt trượt thanh sidebar ra */
+        .sidebar-settings.open {
+            right: 0;
         }
 
-        /* MENU THẢ XUỐNG */
-        .dropdown-menu {
-            position: absolute;
-            top: 75px;
-            right: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 99;
-            display: none;
-            width: 200px;
-        }
-        .dropdown-menu select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-
-        /* --- KHUNG ĐẾM GIỜ CHÍNH --- */
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-            width: 340px;
-            transition: all 0.4s ease;
-        }
-
-        /* Khi bấm START: Xóa hết nền trắng, đẩy vào giữa và MỜ ĐI */
-        .container.running-mode {
-            background: transparent !important;
-            box-shadow: none !important;
-            border: none !important;
-            opacity: 0.3; /* Màu chữ và nút mờ hẳn đi */
-        }
-        .container.running-mode:hover {
-            opacity: 1; /* Di chuột vào giữa màn hình sẽ rõ lại để bấm Tạm dừng */
-        }
-
-        /* Thiết lập màu chữ thời gian NHẠT VÀ DỊU */
-        .time-display {
-            font-size: 75px;
-            font-weight: 700;
-            color: #a8a8a8; /* Màu xám nhạt lo-fi không mỏi mắt */
-            margin: 10px 0 20px 0;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* --- CÀI ĐẶT THỜI GIAN TRỰC TIẾP --- */
-        .config-section {
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(0,0,0,0.03);
-            border-radius: 10px;
-        }
-        .input-row {
+        .sidebar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+        .sidebar-header h3 { margin: 0; font-size: 20px; letter-spacing: 0.5px; }
+        .close-sidebar-btn {
+            background: none; border: none; color: #aaa; font-size: 24px; cursor: pointer;
+        }
+        .close-sidebar-btn:hover { color: white; }
+
+        /* Các mục cấu hình bên trong thanh cài đặt */
+        .setting-group {
+            margin-bottom: 25px;
+        }
+        .setting-group label {
+            display: block;
             font-size: 13px;
-            font-weight: bold;
-            color: #555;
+            color: #aaa;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .input-row input {
-            width: 50px;
-            padding: 4px;
-            text-align: center;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-
-        /* Các nút bấm */
-        .tab-buttons { display: flex; gap: 5px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 8px 0; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px;}
-        .tab-btn.active { background: #74b9ff; color: white; }
-
-        .btn-start {
+        .setting-group input[type="number"], .setting-group select {
             width: 100%;
-            padding: 14px;
-            background: #2c3e50;
+            padding: 10px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
             color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        .setting-group input:focus, .setting-group select:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .save-sidebar-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .save-sidebar-btn:hover {
+            background: white;
+            color: black;
+        }
+
+        /* Ẩn giao diện khi đang chạy để cực kỳ tập trung giống Flocus */
+        .main-timer-container.focus-mode .mode-switcher,
+        .main-timer-container.focus-mode .action-btn {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        /* Khi di chuột vào vùng giữa thì hiện lại nút bấm để Pause */
+        .main-timer-container.focus-mode:hover .mode-switcher,
+        .main-timer-container.focus-mode:hover .action-btn {
+            opacity: 1;
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
 
-    <!-- Nút 3 gạch ở góc phải -->
-    <button class="menu-hamburger" id="menuBtn">☰</button>
-    
-    <!-- Menu thả xuống chứa Hình nền -->
-    <div class="dropdown-menu" id="dropdownMenu">
-        <label style="font-size: 12px; font-weight: bold; color: #666;">CHỌN HÌNH NỀN</label>
-        <select id="bgSelect">
-            <option value="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1920">🏔️ Thụy Sĩ</option>
-            <option value="https://images.unsplash.com/photo-1431274151480-1a111107ec45?q=80&w=1920">🗼 Paris</option>
-            <option value="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=1920">⛩️ Kyoto</option>
-            <option value="https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTOmmZhAjkxSAZLsJi1_y5P4jAIurrHRuJdnYQpJlIy6LFXh6u2qR0EN_HnRuOI6dwLW5N01bP1dPDa-q4">📖 Anime Room</option>
-        </select>
+    <!-- NÚT BÁNH RĂNG MỞ CÀI ĐẶT (GÓC TRÊN PHẢI) -->
+    <button class="settings-toggle-btn" id="openSettingsBtn">⚙️</button>
+
+    <!-- THANH CÀI ĐẶT CẠNH BÊN (SIDEBAR) -->
+    <div class="sidebar-settings" id="sidebarSettings">
+        <div class="sidebar-header">
+            <h3>Cài đặt</h3>
+            <button class="close-sidebar-btn" id="closeSettingsBtn">&times;</button>
+        </div>
+
+        <!-- Chỉnh thời gian -->
+        <div class="setting-group">
+            <label>Thời gian học (Phút)</label>
+            <input type="number" id="input-pomo" value="25" min="1">
+        </div>
+        <div class="setting-group">
+            <label>Nghỉ ngắn (Phút)</label>
+            <input type="number" id="input-short" value="5" min="1">
+        </div>
+        <div class="setting-group">
+            <label>Nghỉ dài (Phút)</label>
+            <input type="number" id="input-long" value="15" min="1">
+        </div>
+
+        <!-- Đổi hình nền -->
+        <div class="setting-group">
+            <label>Hình nền không gian</label>
+            <select id="select-bg">
+                <option value="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1920">🏔️ Thụy Sĩ yên bình</option>
+                <option value="https://images.unsplash.com/photo-1431274151480-1a111107ec45?q=80&w=1920">🗼 Paris mộng mơ</option>
+                <option value="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=1920">⛩️ Kyoto cổ kính</option>
+                <option value="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?q=80&w=1920">🪵 Phòng làm việc gỗ ấm</option>
+            </select>
+        </div>
+
+        <button class="save-sidebar-btn" onclick="saveSettings()">ÁP DỤNG CÀI ĐẶT</button>
     </div>
 
-    <!-- Khung giao diện chính -->
-    <div class="container" id="mainContainer">
-        
-        <!-- Vùng menu chỉnh thời gian (Sẽ bị xóa hoàn toàn khi bấm Start) -->
-        <div id="setupArea">
-            <h2 style="margin: 0 0 15px 0; color: #333; font-size: 20px;">Pomodoro Focus</h2>
-            
-            <div class="tab-buttons">
-                <button class="tab-btn active" id="tab-pomo" onclick="switchMode('pomo')">Học tập</button>
-                <button class="tab-btn" id="tab-short" onclick="switchMode('short')">Nghỉ ngắn</button>
-                <button class="tab-btn" id="tab-long" onclick="switchMode('long')">Nghỉ dài</button>
-            </div>
-
-            <div class="config-section">
-                <div class="input-row">
-                    <label>Thời gian học (phút):</label>
-                    <input type="number" id="cfg-pomo" value="25" min="1">
-                </div>
-                <div class="input-row">
-                    <label>Nghỉ ngắn (phút):</label>
-                    <input type="number" id="cfg-short" value="5" min="1">
-                </div>
-                <div class="input-row">
-                    <label>Nghỉ dài (phút):</label>
-                    <input type="number" id="cfg-long" value="15" min="1">
-                </div>
-                <button onclick="applyCustomTimes()" style="width:100%; padding:5px; margin-top:5px; cursor:pointer; font-weight:bold; background:#fff; border:1px solid #ccc; border-radius:4px;">Cập nhật số phút</button>
-            </div>
+    <!-- GIAO DIỆN HÌNH ĐẾM GIỜ CHÍNH GIỮA MÀN HÌNH -->
+    <div class="main-timer-container" id="timerContainer">
+        <!-- 3 nút tab trần -->
+        <div class="mode-switcher">
+            <button class="mode-btn active" id="btn-pomo" onclick="changeMode('pomo')">Pomodoro</button>
+            <button class="mode-btn" id="btn-short" onclick="changeMode('short')">Short Break</button>
+            <button class="mode-btn" id="btn-long" onclick="changeMode('long')">Long Break</button>
         </div>
 
-        <!-- Khung hiển thị thời gian và nút bấm chính -->
-        <div id="timerArea">
-            <div class="time-display" id="timeText">25:00</div>
-            <button class="btn-start" id="startBtn" onclick="triggerTimer()">BẮT ĐẦU</button>
-        </div>
+        <!-- Số đếm cực đại -->
+        <div class="time-display" id="timeDisplay">25:00</div>
 
+        <!-- Nút hành động -->
+        <button class="action-btn" id="actionBtn" onclick="toggleTimer()">START</button>
     </div>
 
     <script>
-        // Quản lý trạng thái
-        let durations = { pomo: 25, short: 5, long: 15 };
-        let currentMode = 'pomo';
-        let timeLeft = durations.pomo * 60;
-        let timerInterval = null;
-        let isRunning = false;
+        // Dữ liệu thời gian mặc định
+        let configTimes = { pomo: 25, short: 5, long: 15 };
+        let activeMode = 'pomo';
+        let timeLeft = configTimes.pomo * 60;
+        let countdownInterval = null;
+        let timerRunning = false;
 
-        // 1. Đóng/Mở Menu 3 gạch
-        const menuBtn = document.getElementById('menuBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        
-        menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        });
+        // Dom các phần tử Sidebar
+        const sidebar = document.getElementById('sidebarSettings');
+        const openBtn = document.getElementById('openSettingsBtn');
+        const closeBtn = document.getElementById('closeSettingsBtn');
+        const timerContainer = document.getElementById('timerContainer');
 
-        document.addEventListener('click', () => {
-            dropdownMenu.style.display = 'none';
-        });
+        // Sự kiện Đóng/Mở Sidebar bằng hiệu ứng trượt
+        openBtn.addEventListener('click', () => sidebar.classList.add('open'));
+        closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
 
-        // Đổi hình nền
-        document.getElementById('bgSelect').addEventListener('change', function() {
+        // Đổi hình nền trực tiếp khi chọn trong danh sách
+        document.getElementById('select-bg').addEventListener('change', function() {
             document.body.style.backgroundImage = `url('${this.value}')`;
         });
 
-        // 2. Chỉnh mức thời gian trực tiếp
-        function applyCustomTimes() {
-            durations.pomo = parseInt(document.getElementById('cfg-pomo').value) || 25;
-            durations.short = parseInt(document.getElementById('cfg-short').value) || 5;
-            durations.long = parseInt(document.getElementById('cfg-long').value) || 15;
+        // Áp dụng số phút mới từ Sidebar cấu hình
+        function saveSettings() {
+            configTimes.pomo = parseInt(document.getElementById('input-pomo').value) || 25;
+            configTimes.short = parseInt(document.getElementById('input-short').value) || 5;
+            configTimes.long = parseInt(document.getElementById('input-long').value) || 15;
             
-            alert("Đã cập nhật thời gian thành công!");
-            resetTimer();
+            sidebar.classList.remove('open'); // Đóng cài đặt lại sau khi lưu
+            resetCurrentTimer();
         }
 
-        function switchMode(mode) {
-            if (isRunning) return;
-            currentMode = mode;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            if(mode === 'pomo') document.getElementById('tab-pomo').classList.add('active');
-            if(mode === 'short') document.getElementById('tab-short').classList.add('active');
-            if(mode === 'long') document.getElementById('tab-long').classList.add('active');
-            resetTimer();
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            isRunning = false;
-            timeLeft = durations[currentMode] * 60;
-            renderDisplay();
+        // Chuyển chế độ đếm giờ (Pomodoro / Nghỉ ngắn / Nghỉ dài)
+        function changeMode(mode) {
+            if (timerRunning) return; // Đang chạy thì không cho bấm đổi chế độ bừa bãi
             
-            // Hiện lại toàn bộ menu cài đặt
-            document.getElementById('setupArea').style.display = 'block';
-            menuBtn.style.display = 'block';
-            document.getElementById('mainContainer').classList.remove('running-mode');
-            document.getElementById('startBtn').textContent = 'BẮT ĐẦU';
+            activeMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${mode}`).classList.add('active');
+            
+            resetCurrentTimer();
         }
 
-        function renderDisplay() {
-            let mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            let secs = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timeText').textContent = `${mins}:${secs}`;
+        // Đặt lại đồng hồ về ban đầu
+        function resetCurrentTimer() {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            timerRunning = false;
+            timeLeft = configTimes[activeMode] * 60;
+            updateDisplay();
+            
+            document.getElementById('actionBtn').textContent = 'START';
+            timerContainer.classList.remove('focus-mode'); // Hiện lại các thành phần phụ
+            openBtn.style.display = 'flex'; // Hiện lại nút cài đặt bánh răng
         }
 
-        // 3. Khi ấn START/PAUSE
-        function triggerTimer() {
-            const container = document.getElementById('mainContainer');
-            const setupArea = document.getElementById('setupArea');
-            const startBtn = document.getElementById('startBtn');
+        // Cập nhật text hiển thị thời gian lên màn hình
+        function updateDisplay() {
+            let minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            let seconds = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timeDisplay').textContent = `${minutes}:${seconds}`;
+        }
 
-            if (!isRunning) {
-                // TRẠNG THÁI CHẠY ĐẾM GIỜ
-                isRunning = true;
-                
-                // Giấu sạch menu cài đặt & nút 3 gạch
-                setupArea.style.display = 'none';
-                menuBtn.style.display = 'none';
-                dropdownMenu.style.display = 'none';
-                
-                // Biến mất nền trắng, chuyển khung số ra giữa và làm mờ đi
-                container.classList.add('running-mode');
-                startBtn.textContent = 'TẠM DỪNG';
+        // Bật/Tạm dừng đếm giờ chính
+        function toggleTimer() {
+            const actionBtn = document.getElementById('actionBtn');
 
-                timerInterval = setInterval(() => {
+            if (!timerRunning) {
+                // KHI BẤM CHẠY
+                timerRunning = true;
+                actionBtn.textContent = 'PAUSE';
+                
+                // Giấu nút cài đặt bánh răng đi để tập trung tối đa
+                openBtn.style.display = 'none';
+                sidebar.classList.remove('open');
+                
+                // Kích hoạt chế độ focus (Ẩn mờ các nút tab và nút bấm khi không di chuột)
+                timerContainer.classList.add('focus-mode');
+
+                countdownInterval = setInterval(() => {
                     if (timeLeft > 0) {
                         timeLeft--;
-                        renderDisplay();
+                        updateDisplay();
                     } else {
-                        alert("Hết giờ rồi!");
-                        resetTimer();
+                        alert("Hoàn thành phiên làm việc!");
+                        resetCurrentTimer();
                     }
                 }, 1000);
             } else {
-                // TRẠNG THÁI BẤM TẠM DỪNG -> HIỆN LẠI MENU
-                resetTimer();
+                // KHI BẤM TẠM DỪNG
+                resetCurrentTimer();
             }
         }
     </script>
