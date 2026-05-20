@@ -163,10 +163,8 @@
 </head>
 <body>
 
-    <!-- Nút Cài Đặt -->
     <button class="settings-toggle-btn" id="openSettingsBtn">⚙️</button>
 
-    <!-- Sidebar Cài Đặt -->
     <div class="sidebar-settings" id="sidebarSettings">
         <div class="sidebar-header">
             <h3 id="txt-title">Settings</h3>
@@ -194,24 +192,25 @@
             <input type="number" id="input-long" value="15" min="1">
         </div>
 
-        <!-- Chọn Hình Nền Lofi / Chill -->
         <div class="setting-group">
             <label id="txt-bg-label">Background Space</label>
             <select id="select-bg">
                 <option value="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=1920">🏔️ Swiss Alps (Default)</option>
-                <option value="https://images.unsplash.com/photo-1518481612222-68bab828fd1d?q=80&w=1920">🎮 Cozy Retro Room</option>
-                <option value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1920">📻 Lofi Vinyl Vibes</option>
-                <option value="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=1920">🌃 Neon Cyberpunk</option>
                 <option value="https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=1920">🌧️ Rainy Window</option>
                 <option value="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=1920">🌿 Minimalist Desk</option>
-                <option value="https://images.unsplash.com/photo-1506744626753-143d4eb38977?q=80&w=1920">🌅 Sunset Chill</option>
+                
+                <option value="image_addb50.png">🌲 Purple Forest Tower</option>
+                <option value="image_addb6c.png">☁️ Anime Sky & Grass</option>
+                <option value="image_addbc5.jpg">🛖 Lofi Cabin Night</option>
+                <option value="image_addbcd.jpg">🏖️ Pastel Beach</option>
+                <option value="image_ade2d1.jpg">🌸 Cherry Blossom Street</option>
+                <option value="image_ade311.png">🚂 Lofi Train Ride</option>
             </select>
         </div>
 
         <button class="save-sidebar-btn" id="btn-save" onclick="saveSettings()">APPLY SETTINGS</button>
     </div>
 
-    <!-- KHUNG ĐẾM GIỜ CHÍNH -->
     <div class="main-timer-container" id="timerContainer">
         
         <div class="mode-switcher" id="modeSwitcher">
@@ -281,73 +280,4 @@
         document.getElementById('closeSettingsBtn').addEventListener('click', () => sidebar.classList.remove('open'));
 
         document.getElementById('select-bg').addEventListener('change', function() {
-            document.body.style.backgroundImage = `url('${this.value}')`;
-        });
-
-        function saveSettings() {
-            configTimes.pomo = parseInt(document.getElementById('input-pomo').value) || 25;
-            configTimes.short = parseInt(document.getElementById('input-short').value) || 5;
-            configTimes.long = parseInt(document.getElementById('input-long').value) || 15;
-            sidebar.classList.remove('open'); 
-            resetCurrentTimer();
-        }
-
-        function changeMode(mode) {
-            if (timerRunning) return; 
-            activeMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btn-${mode}`).classList.add('active');
-            resetCurrentTimer();
-        }
-
-        function resetCurrentTimer() {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-            timerRunning = false;
-            timeLeft = configTimes[activeMode] * 60;
-            updateDisplay();
-            
-            document.getElementById('actionBtn').textContent = langData[currentLang].start;
-            
-            // Xóa class focus-mode để hiển thị lại tất cả các nút
-            document.getElementById('timerContainer').classList.remove('focus-mode');
-            document.getElementById('openSettingsBtn').style.display = 'flex';
-        }
-
-        function updateDisplay() {
-            let minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            let seconds = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timeDisplay').textContent = `${minutes}:${seconds}`;
-        }
-
-        function toggleTimer() {
-            const actionBtn = document.getElementById('actionBtn');
-            const timerContainer = document.getElementById('timerContainer');
-
-            if (!timerRunning) {
-                timerRunning = true;
-                actionBtn.textContent = langData[currentLang].pause;
-                
-                // Ẩn nút cài đặt
-                document.getElementById('openSettingsBtn').style.display = 'none';
-                sidebar.classList.remove('open');
-                
-                // Kích hoạt Focus Mode: ẩn sạch chữ và nút, chỉ chừa lại số
-                timerContainer.classList.add('focus-mode');
-
-                countdownInterval = setInterval(() => {
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        updateDisplay();
-                    } else {
-                        alert("Time's up!");
-                        resetCurrentTimer();
-                    }
-                }, 1000);
-            } else {
-                resetCurrentTimer();
-            }
-        }
-    </script>
-</body>
-</html>
+            document.
