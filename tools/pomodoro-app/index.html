@@ -14,6 +14,9 @@
             background-repeat: no-repeat;
             transition: background-image 1.2s ease-in-out;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background-color: #2c3e50;
         }
 
@@ -22,11 +25,12 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.2);
             z-index: 1;
+            transition: opacity 0.5s;
         }
 
-        /* --- THANH MENU ĐIỀU KHIỂN TOP --- */
+        /* --- THANH MENU ĐIỀU KHIỂN TOP (Ngôn ngữ, Hình nền) --- */
         .top-controls {
             position: absolute;
             top: 20px;
@@ -39,8 +43,8 @@
             transition: opacity 0.5s;
         }
 
-        /* Ẩn menu top khi đang chạy */
-        body.running-mode .top-controls {
+        /* Ẩn menu top khi đang chạy timer */
+        body.is-running .top-controls {
             opacity: 0;
             pointer-events: none;
         }
@@ -55,13 +59,6 @@
             align-items: center;
             gap: 10px;
             border: 1px solid rgba(255,255,255,0.5);
-            cursor: pointer;
-            transition: transform 0.2s, background 0.3s;
-        }
-
-        .control-group:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.95);
         }
 
         .control-group span { font-size: 13px; font-weight: bold; color: #2c3e50; }
@@ -73,73 +70,74 @@
         }
         .custom-select:hover { background: #f1f3f5; }
 
-        /* --- THẺ CHỨA POMODORO (HIỆU ỨNG DI CHUYỂN) --- */
-        .timer-wrapper {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            width: 100%;
-            max-width: 380px;
-            transition: all 0.7s cubic-bezier(0.25, 1, 0.3, 1);
-        }
-
-        /* Trạng thái khi Bắt đầu -> Chuyển vào góc, thu nhỏ lại */
-        .timer-wrapper.is-running {
-            top: 100%;
-            left: 100%;
-            transform: translate(calc(-100% - 30px), calc(-100% - 30px)) scale(0.85);
-        }
-
+        /* --- THẺ CHỨA POMODORO CHÍNH --- */
         .timer-card { 
+            position: relative;
+            z-index: 2;
             background: rgba(255, 255, 255, 0.8); 
             padding: 40px; 
             border-radius: 24px; 
             box-shadow: 0 24px 64px rgba(0,0,0,0.3), 0 0 40px rgba(255,255,255,0.4) inset; 
             text-align: center; 
+            max-width: 400px;
+            width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            transition: all 0.7s cubic-bezier(0.25, 1, 0.3, 1);
-        }
-        
-        .timer-wrapper:not(.is-running) .timer-card:hover { transform: translateY(-4px); }
-
-        /* Mờ background khi vào góc */
-        .timer-wrapper.is-running .timer-card {
-            background: rgba(255, 255, 255, 0.08); /* Trong suốt gần như hoàn toàn */
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(8px);
-            padding: 25px 30px;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.3, 1);
         }
 
-        /* Các phần tử mượt mà ẩn đi khi đang chạy */
-        h1, .status-text, .mode-container {
-            transition: all 0.4s ease;
+        /* TRẠNG THÁI KHI ĐANG ĐẾM GIỜ (BẤM BẮT ĐẦU) */
+        .timer-card.running {
+            background: transparent;
+            box-shadow: none;
+            border-color: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        /* Ẩn các phần tử không cần thiết khi chạy */
+        .hide-on-run {
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.3, 1);
+            max-height: 500px;
+            opacity: 1;
             overflow: hidden;
         }
 
-        .timer-wrapper.is-running h1,
-        .timer-wrapper.is-running .status-text,
-        .timer-wrapper.is-running .mode-container {
-            opacity: 0;
+        .timer-card.running .hide-on-run {
             max-height: 0;
+            opacity: 0;
             margin: 0;
             padding: 0;
+            pointer-events: none;
         }
 
+        /* Vùng hiển thị thời gian khi chạy sẽ MỜ ĐI */
+        .running-elements {
+            transition: all 0.5s ease;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .timer-card.running .running-elements {
+            opacity: 0.45; /* Làm mờ khung thời gian đi */
+            transform: scale(1.1); /* Hơi phóng to lên một chút */
+        }
+        
+        /* Khi di chuột vào thì sáng lên để dễ bấm nút */
+        .timer-card.running .running-elements:hover {
+            opacity: 1;
+        }
+
+        /* Các phần tử Text & Nút bấm cơ bản */
         h1 { 
             background: linear-gradient(45deg, #ff4e50, #f9d423);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             font-size: 26px; margin-top: 0; margin-bottom: 5px; font-weight: 800;
         }
-
-        .status-text { color: #e74c3c; font-size: 12px; margin-bottom: 25px; font-weight: bold; letter-spacing: 2px;}
+        .status-text { color: #e74c3c; font-size: 12px; margin-bottom: 15px; font-weight: bold; letter-spacing: 2px;}
         
-        .mode-container { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 8px; max-height: 50px;}
-        
+        .mode-container { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 8px;}
         .mode-btn { 
             background-color: rgba(0,0,0,0.06); border: none; padding: 12px 5px; 
             font-size: 12px; font-weight: bold; border-radius: 12px; cursor: pointer; 
@@ -150,19 +148,35 @@
         .mode-btn.active#btn-short { background: linear-gradient(135deg, #00c6ff, #0072ff); color: white; box-shadow: 0 4px 10px rgba(0,114,255,0.3); }
         .mode-btn.active#btn-long { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; box-shadow: 0 4px 10px rgba(56,239,125,0.3); }
         
+        /* CÀI ĐẶT INLINE (Hiển thị ngay trong thẻ) */
+        .settings-toggle-btn {
+            background: none; border: none; font-size: 13px; color: #7f8c8d; font-weight: bold;
+            cursor: pointer; margin-bottom: 15px; transition: color 0.2s; text-decoration: underline;
+        }
+        .settings-toggle-btn:hover { color: #2c3e50; }
+
+        .settings-panel {
+            background: rgba(255,255,255,0.6); padding: 15px; border-radius: 15px; margin-bottom: 20px;
+            display: none; /* Mặc định ẩn, bấm nút mới hiện */
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .settings-panel.open { display: block; }
+        
+        .input-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .input-group label { font-weight: bold; color: #495057; font-size: 13px; }
+        .input-group input { width: 50px; padding: 6px; border-radius: 8px; border: 1px solid #ced4da; text-align: center; font-weight: bold; outline: none; }
+        .input-group input:focus { border-color: #ff416c; }
+        .btn-save { background: #2c3e50; color: white; border: none; padding: 8px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px;}
+        .btn-save:hover { background: #1a252f; }
+
+        /* THỜI GIAN VÀ NÚT CHÍNH */
         .time { 
             font-size: 80px; font-weight: 900; color: #ff416c; 
-            margin: 10px 0 25px 0; font-variant-numeric: tabular-nums; 
+            margin: 0 0 20px 0; font-variant-numeric: tabular-nums; 
             text-shadow: 2px 4px 12px rgba(0,0,0,0.12);
-            transition: all 0.5s ease;
+            transition: color 0.4s ease;
         }
         
-        .timer-wrapper.is-running .time {
-            font-size: 55px; /* Chữ nhỏ lại khi ở góc */
-            margin: 0 0 15px 0;
-            text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
-        }
-
         .btn-main { 
             background: linear-gradient(45deg, #ff4e50, #f9d423); color: white; border: none; 
             padding: 16px 30px; font-size: 18px; border-radius: 50px; cursor: pointer; 
@@ -170,55 +184,15 @@
             box-shadow: 0 6px 20px rgba(255, 78, 80, 0.4);
         }
         .btn-main:hover { transform: scale(1.03); box-shadow: 0 8px 25px rgba(255, 78, 80, 0.55); }
-        
-        .timer-wrapper.is-running .btn-main {
-            padding: 12px 20px;
-            font-size: 15px;
-        }
-
-        /* --- MODAL CÀI ĐẶT --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 100; opacity: 0; visibility: hidden; transition: all 0.3s;
-        }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .modal-content {
-            background: white; padding: 25px 30px; border-radius: 20px;
-            width: 90%; max-width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            transform: translateY(20px); transition: all 0.3s;
-        }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
-        
-        .modal-content h2 { margin-top: 0; color: #2c3e50; font-size: 20px; text-align: center; }
-        
-        .input-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .input-group label { font-weight: bold; color: #495057; font-size: 14px; }
-        .input-group input { width: 60px; padding: 8px; border-radius: 10px; border: 1px solid #ced4da; text-align: center; font-weight: bold; outline: none; }
-        .input-group input:focus { border-color: #ff416c; }
-        
-        .modal-actions { display: flex; gap: 10px; margin-top: 25px; }
-        .modal-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;}
-        .btn-cancel { background: #f1f3f5; color: #495057; }
-        .btn-cancel:hover { background: #e2e6ea; }
-        .btn-save { background: linear-gradient(45deg, #ff4e50, #f9d423); color: white; }
-        .btn-save:hover { opacity: 0.9; }
-
     </style>
 </head>
 <body>
 
-    <!-- Khung Menu Điều Khiển Top -->
+    <!-- Khung Menu Điều Khiển Top (Sẽ biến mất khi chạy) -->
     <div class="top-controls">
-        <div class="control-group" onclick="openSettings()">
-            <span id="label-settings">⚙️ Cài đặt</span>
-        </div>
-
         <div class="control-group">
             <span id="label-lang">🌐 Ngôn ngữ:</span>
-            <select class="custom-select" id="langSelect" onchange="changeLanguage()" onclick="event.stopPropagation()">
+            <select class="custom-select" id="langSelect" onchange="changeLanguage()">
                 <option value="vi">Tiếng Việt</option>
                 <option value="en">English</option>
             </select>
@@ -226,109 +200,84 @@
 
         <div class="control-group">
             <span id="label-bg">🌍 Hình nền:</span>
-            <select class="custom-select" id="bgSelect" onchange="changeBackground()" onclick="event.stopPropagation()">
+            <select class="custom-select" id="bgSelect" onchange="changeBackground()">
                 <option value="anime_room" id="opt-anime-room">📖 Phòng học Anime</option>
                 <option value="anime_sakura" id="opt-anime-sakura">🌸 Anime Hoa Anh Đào</option>
                 <option value="swiss_alps" id="opt-swiss">🏔️ Thung lũng Thụy Sĩ</option>
                 <option value="paris_night" id="opt-paris">🗼 Paris Về Đêm</option>
-                <option value="kyoto_shrine" id="opt-kyoto">⛩️ Đền thờ Kyoto (Nhật Bản)</option>
-                <option value="halong_bay" id="opt-halong">⛵ Vịnh Hạ Long (Việt Nam)</option>
+                <option value="kyoto_shrine" id="opt-kyoto">⛩️ Đền thờ Kyoto</option>
+                <option value="halong_bay" id="opt-halong">⛵ Vịnh Hạ Long</option>
             </select>
         </div>
     </div>
 
-    <!-- Modal Cài Đặt Thời Gian -->
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal-content">
-            <h2 id="modal-title">Cài đặt thời gian (phút)</h2>
-            <div class="input-group">
-                <label id="label-set-pomodoro">Pomodoro</label>
-                <input type="number" id="input-pomodoro" min="1" max="120" value="25">
-            </div>
-            <div class="input-group">
-                <label id="label-set-short">Nghỉ giải lao ngắn</label>
-                <input type="number" id="input-short" min="1" max="30" value="5">
-            </div>
-            <div class="input-group">
-                <label id="label-set-long">Nghỉ ngơi dài</label>
-                <input type="number" id="input-long" min="1" max="60" value="15">
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn btn-cancel" id="btn-cancel" onclick="closeSettings()">Hủy</button>
-                <button class="modal-btn btn-save" id="btn-save" onclick="saveSettings()">Lưu</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Thẻ Đếm Giờ (Nằm trong Wrapper để làm hiệu ứng bay vào góc) -->
-    <div class="timer-wrapper" id="timerWrapper">
-        <div class="timer-card">
+    <!-- Thẻ Đếm Giờ Ở Giữa -->
+    <div class="timer-card" id="timerCard">
+        
+        <!-- Phần này sẽ ẨN ĐI khi bấm BẮT ĐẦU -->
+        <div class="hide-on-run">
             <h1 id="app-title">🎯 ELF Pomodoro</h1>
             <div class="status-text" id="status">SẴN SÀNG HỌC TẬP</div>
             
+            <!-- Nút chọn Tab -->
             <div class="mode-container">
                 <button class="mode-btn active" id="btn-pomodoro" onclick="setMode('pomodoro')">25m Học</button>
                 <button class="mode-btn" id="btn-short" onclick="setMode('short')">5m Nghỉ</button>
                 <button class="mode-btn" id="btn-long" onclick="setMode('long')">15m Nghỉ</button>
             </div>
 
+            <!-- Mở Menu Cài đặt ngay trong thẻ -->
+            <button class="settings-toggle-btn" id="btn-settings-toggle" onclick="toggleSettingsPanel()">⚙️ Cài đặt thời gian</button>
+            
+            <div class="settings-panel" id="settingsPanel">
+                <div class="input-group">
+                    <label id="lbl-set-pomodoro">Pomodoro (Học)</label>
+                    <input type="number" id="input-pomodoro" value="25" min="1">
+                </div>
+                <div class="input-group">
+                    <label id="lbl-set-short">Nghỉ ngắn</label>
+                    <input type="number" id="input-short" value="5" min="1">
+                </div>
+                <div class="input-group">
+                    <label id="lbl-set-long">Nghỉ dài</label>
+                    <input type="number" id="input-long" value="15" min="1">
+                </div>
+                <button class="btn-save" id="btn-save" onclick="saveSettings()">Lưu thay đổi</button>
+            </div>
+        </div>
+
+        <!-- Phần này SẼ MỜ ĐI nhưng VẪN HIỂN THỊ Ở GIỮA khi bấm BẮT ĐẦU -->
+        <div class="running-elements">
             <div class="time" id="timer">25:00</div>
             <button class="btn-main" id="startBtn" onclick="toggleTimer()">BẮT ĐẦU</button>
         </div>
+        
     </div>
 
     <script>
-        // --- DỮ LIỆU ĐA NGÔN NGỮ ---
+        // --- NGÔN NGỮ ---
         const i18n = {
             vi: {
-                labelSettings: "⚙️ Cài đặt",
-                labelLang: "🌐 Ngôn ngữ:",
-                labelBg: "🌍 Hình nền:",
-                appTitle: "🎯 ELF Pomodoro",
-                statusPomodoro: "SẴN SÀNG HỌC TẬP",
-                statusShort: "NGHỈ GIẢI LAO NGẮN",
-                statusLong: "NGHỈ NGƠI DÀI",
-                btnStart: "BẮT ĐẦU",
-                btnPause: "TẠM DỪNG",
-                btnResume: "TIẾP TỤC",
-                alertDone: "⏳ Đã hết thời gian! Chuyển sang bước tiếp theo nào.",
-                optAnimeRoom: "📖 Phòng học Anime",
-                optAnimeSakura: "🌸 Anime Hoa Anh Đào",
-                optSwiss: "🏔️ Thung lũng Thụy Sĩ",
-                optParis: "🗼 Paris Về Đêm",
-                optKyoto: "⛩️ Đền thờ Kyoto",
-                optHalong: "⛵ Vịnh Hạ Long",
-                modalTitle: "Cài đặt thời gian (phút)",
-                labelSetPomodoro: "Pomodoro (Học)",
-                labelSetShort: "Nghỉ giải lao ngắn",
-                labelSetLong: "Nghỉ ngơi dài",
-                btnCancel: "Hủy",
-                btnSave: "Lưu Cài Đặt"
+                labelLang: "🌐 Ngôn ngữ:", labelBg: "🌍 Hình nền:", appTitle: "🎯 ELF Pomodoro",
+                statusPomodoro: "SẴN SÀNG HỌC TẬP", statusShort: "NGHỈ GIẢI LAO NGẮN", statusLong: "NGHỈ NGƠI DÀI",
+                btnStart: "BẮT ĐẦU", btnPause: "TẠM DỪNG", btnResume: "TIẾP TỤC",
+                optAnimeRoom: "📖 Phòng học Anime", optAnimeSakura: "🌸 Anime Hoa Anh Đào",
+                optSwiss: "🏔️ Thung lũng Thụy Sĩ", optParis: "🗼 Paris Về Đêm",
+                optKyoto: "⛩️ Đền thờ Kyoto", optHalong: "⛵ Vịnh Hạ Long",
+                btnSettingsToggle: "⚙️ Cài đặt thời gian", lblPomodoro: "Pomodoro (Học)",
+                lblShort: "Nghỉ ngắn", lblLong: "Nghỉ dài", btnSave: "Lưu thay đổi",
+                alertDone: "⏳ Đã hết thời gian!"
             },
             en: {
-                labelSettings: "⚙️ Settings",
-                labelLang: "🌐 Language:",
-                labelBg: "🌍 Background:",
-                appTitle: "🎯 Focus Timer",
-                statusPomodoro: "READY TO FOCUS",
-                statusShort: "SHORT BREAK",
-                statusLong: "LONG BREAK",
-                btnStart: "START",
-                btnPause: "PAUSE",
-                btnResume: "RESUME",
-                alertDone: "⏳ Time is up! Let's move to the next step.",
-                optAnimeRoom: "📖 Anime Study Room",
-                optAnimeSakura: "🌸 Anime Sakura",
-                optSwiss: "🏔️ Swiss Alps",
-                optParis: "🗼 Paris at Night",
-                optKyoto: "⛩️ Kyoto Shrine",
-                optHalong: "⛵ Halong Bay",
-                modalTitle: "Timer Settings (minutes)",
-                labelSetPomodoro: "Pomodoro (Focus)",
-                labelSetShort: "Short Break",
-                labelSetLong: "Long Break",
-                btnCancel: "Cancel",
-                btnSave: "Save Settings"
+                labelLang: "🌐 Language:", labelBg: "🌍 Background:", appTitle: "🎯 Focus Timer",
+                statusPomodoro: "READY TO FOCUS", statusShort: "SHORT BREAK", statusLong: "LONG BREAK",
+                btnStart: "START", btnPause: "PAUSE", btnResume: "RESUME",
+                optAnimeRoom: "📖 Anime Study Room", optAnimeSakura: "🌸 Anime Sakura",
+                optSwiss: "🏔️ Swiss Alps", optParis: "🗼 Paris at Night",
+                optKyoto: "⛩️ Kyoto Shrine", optHalong: "⛵ Halong Bay",
+                btnSettingsToggle: "⚙️ Time Settings", lblPomodoro: "Pomodoro (Focus)",
+                lblShort: "Short Break", lblLong: "Long Break", btnSave: "Save Changes",
+                alertDone: "⏳ Time is up!"
             }
         };
 
@@ -341,9 +290,7 @@
             halong_bay: "url('https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1920&auto=format&fit=crop')"
         };
 
-        // Biến lưu thời gian cài đặt
         let times = { pomodoro: 25, short: 5, long: 15 };
-        
         let timeLeft = times.pomodoro * 60;
         let timerId = null;
         let currentMode = 'pomodoro'; 
@@ -355,13 +302,10 @@
             updateText();
         };
 
-        // Cập nhật background
         function changeBackground() {
-            const selectedKey = document.getElementById('bgSelect').value;
-            document.body.style.backgroundImage = backgrounds[selectedKey];
+            document.body.style.backgroundImage = backgrounds[document.getElementById('bgSelect').value];
         }
 
-        // Đa ngôn ngữ
         function changeLanguage() {
             currentLang = document.getElementById('langSelect').value;
             updateText();
@@ -369,14 +313,10 @@
 
         function updateText() {
             const t = i18n[currentLang];
-            
-            // Labels Top Menu
-            document.getElementById('label-settings').textContent = t.labelSettings;
             document.getElementById('label-lang').textContent = t.labelLang;
             document.getElementById('label-bg').textContent = t.labelBg;
             document.getElementById('app-title').textContent = t.appTitle;
-
-            // Options Background
+            
             document.getElementById('opt-anime-room').textContent = t.optAnimeRoom;
             document.getElementById('opt-anime-sakura').textContent = t.optAnimeSakura;
             document.getElementById('opt-swiss').textContent = t.optSwiss;
@@ -384,59 +324,42 @@
             document.getElementById('opt-kyoto').textContent = t.optKyoto;
             document.getElementById('opt-halong').textContent = t.optHalong;
 
-            // Mode Buttons (Cập nhật cả số phút hiện tại)
-            document.getElementById('btn-pomodoro').textContent = `${times.pomodoro}m Học`;
-            document.getElementById('btn-short').textContent = `${times.short}m Nghỉ`;
-            document.getElementById('btn-long').textContent = `${times.long}m Nghỉ`;
-            
-            if (currentLang === 'en') {
-                document.getElementById('btn-pomodoro').textContent = `${times.pomodoro}m Focus`;
-                document.getElementById('btn-short').textContent = `${times.short}m Break`;
-                document.getElementById('btn-long').textContent = `${times.long}m Break`;
-            }
+            document.getElementById('btn-pomodoro').textContent = `${times.pomodoro}m ${currentLang === 'vi' ? 'Học' : 'Focus'}`;
+            document.getElementById('btn-short').textContent = `${times.short}m ${currentLang === 'vi' ? 'Nghỉ' : 'Break'}`;
+            document.getElementById('btn-long').textContent = `${times.long}m ${currentLang === 'vi' ? 'Nghỉ' : 'Break'}`;
 
-            // Status Text
             if (currentMode === 'pomodoro') document.getElementById('status').textContent = t.statusPomodoro;
             if (currentMode === 'short') document.getElementById('status').textContent = t.statusShort;
             if (currentMode === 'long') document.getElementById('status').textContent = t.statusLong;
 
-            // Start Button
+            document.getElementById('btn-settings-toggle').textContent = t.btnSettingsToggle;
+            document.getElementById('lbl-set-pomodoro').textContent = t.lblPomodoro;
+            document.getElementById('lbl-set-short').textContent = t.lblShort;
+            document.getElementById('lbl-set-long').textContent = t.lblLong;
+            document.getElementById('btn-save').textContent = t.btnSave;
+
             const startBtn = document.getElementById('startBtn');
             if (timerState === 'idle') startBtn.textContent = t.btnStart;
             else if (timerState === 'running') startBtn.textContent = t.btnPause;
             else if (timerState === 'paused') startBtn.textContent = t.btnResume;
-
-            // Modal Settings
-            document.getElementById('modal-title').textContent = t.modalTitle;
-            document.getElementById('label-set-pomodoro').textContent = t.labelSetPomodoro;
-            document.getElementById('label-set-short').textContent = t.labelSetShort;
-            document.getElementById('label-set-long').textContent = t.labelSetLong;
-            document.getElementById('btn-cancel').textContent = t.btnCancel;
-            document.getElementById('btn-save').textContent = t.btnSave;
         }
 
-        // --- CÁC HÀM XỬ LÝ SETTINGS MODAL ---
-        function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
-        
-        function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
-        
+        // --- CÀI ĐẶT THỜI GIAN ---
+        function toggleSettingsPanel() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+        }
+
         function saveSettings() {
-            // Lấy giá trị từ input, nếu trống hoặc lỗi thì lấy mặc định
             times.pomodoro = parseInt(document.getElementById('input-pomodoro').value) || 25;
             times.short = parseInt(document.getElementById('input-short').value) || 5;
             times.long = parseInt(document.getElementById('input-long').value) || 15;
             
-            closeSettings();
-            
-            // Nếu đồng hồ đang không chạy, tự động load lại thời gian mới
-            if(timerState === 'idle') {
-                setMode(currentMode);
-            } else {
-                updateText(); // Chỉ cập nhật label nút bấm
-            }
+            document.getElementById('settingsPanel').classList.remove('open');
+            if(timerState === 'idle') setMode(currentMode); 
+            else updateText();
         }
 
-        // --- CORE POMODORO ---
+        // --- HỆ THỐNG ĐẾM GIỜ ---
         function updateTimerDisplay() {
             let minutes = Math.floor(timeLeft / 60);
             let seconds = timeLeft % 60;
@@ -444,23 +367,14 @@
         }
 
         function setMode(mode) {
-            clearInterval(timerId);
-            timerId = null;
-            timerState = 'idle';
-            currentMode = mode;
+            clearInterval(timerId); timerId = null; timerState = 'idle'; currentMode = mode;
             
-            // Đưa thẻ quay về giữa màn hình
-            document.getElementById('timerWrapper').classList.remove('is-running');
-            document.body.classList.remove('running-mode');
+            // Xóa trạng thái đang chạy (hiện lại background thẻ)
+            document.getElementById('timerCard').classList.remove('running');
+            document.body.classList.remove('is-running');
 
-            const startBtn = document.getElementById('startBtn');
-            startBtn.style.background = "linear-gradient(45deg, #ff4e50, #f9d423)";
-            startBtn.style.boxShadow = "0 6px 20px rgba(255, 78, 80, 0.4)";
-
-            // Gán số phút tương ứng từ object times
             timeLeft = times[mode] * 60;
-            updateText(); 
-            updateTimerDisplay();
+            updateText(); updateTimerDisplay();
 
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`btn-${mode}`).classList.add('active');
@@ -469,47 +383,49 @@
             if (mode === 'pomodoro') timerDisplay.style.color = '#ff416c'; 
             else if (mode === 'short') timerDisplay.style.color = '#0072ff'; 
             else timerDisplay.style.color = '#11998e'; 
+            
+            resetStartButton();
+        }
+
+        function resetStartButton() {
+            const startBtn = document.getElementById('startBtn');
+            startBtn.style.background = "linear-gradient(45deg, #ff4e50, #f9d423)";
+            startBtn.style.boxShadow = "0 6px 20px rgba(255, 78, 80, 0.4)";
         }
 
         function toggleTimer() {
             const startBtn = document.getElementById('startBtn');
-            const wrapper = document.getElementById('timerWrapper');
+            const card = document.getElementById('timerCard');
             const t = i18n[currentLang];
 
             if (timerState === 'idle' || timerState === 'paused') {
-                // CHẠY TIMER -> Chuyển vào góc
+                // KHI BẤM CHẠY -> ẨN HẾT, CHỈ ĐỂ LẠI TIME MỜ
                 timerState = 'running';
-                wrapper.classList.add('is-running');
-                document.body.classList.add('running-mode'); // Dùng để ẩn menu top
+                card.classList.add('running');
+                document.body.classList.add('is-running'); // Ẩn menu top
 
                 startBtn.textContent = t.btnPause;
                 startBtn.style.background = "linear-gradient(45deg, #e65c00, #f9d423)"; 
-                startBtn.style.boxShadow = "0 6px 20px rgba(230, 92, 0, 0.4)";
+                startBtn.style.boxShadow = "none";
                 
                 timerId = setInterval(() => {
                     if (timeLeft > 0) { 
-                        timeLeft--; 
-                        updateTimerDisplay(); 
+                        timeLeft--; updateTimerDisplay(); 
                     } else { 
-                        // HẾT GIỜ -> Tự động quay về giữa
-                        clearInterval(timerId); 
-                        timerId = null;
-                        timerState = 'idle';
-                        wrapper.classList.remove('is-running');
-                        document.body.classList.remove('running-mode');
-
+                        // HẾT GIỜ
+                        clearInterval(timerId); timerId = null; timerState = 'idle';
+                        card.classList.remove('running');
+                        document.body.classList.remove('is-running');
                         startBtn.textContent = t.btnStart;
-                        startBtn.style.background = "linear-gradient(45deg, #ff4e50, #f9d423)";
-                        startBtn.style.boxShadow = "0 6px 20px rgba(255, 78, 80, 0.4)";
+                        resetStartButton();
                         alert(t.alertDone); 
                     }
                 }, 1000);
             } else {
-                // TẠM DỪNG -> Trả thẻ về giữa màn hình để dễ nhìn
-                clearInterval(timerId);
-                timerState = 'paused';
-                wrapper.classList.remove('is-running');
-                document.body.classList.remove('running-mode');
+                // KHI BẤM TẠM DỪNG -> HIỆN LẠI BÌNH THƯỜNG
+                clearInterval(timerId); timerState = 'paused';
+                card.classList.remove('running');
+                document.body.classList.remove('is-running');
 
                 startBtn.textContent = t.btnResume;
                 startBtn.style.background = "linear-gradient(45deg, #8a2387, #e94057, #f27121)"; 
