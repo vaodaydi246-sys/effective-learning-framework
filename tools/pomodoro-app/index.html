@@ -3,19 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Effective Learning - Advanced Pomodoro - Colorful Edition</title>
+    <title>Effective Learning - Advanced Pomodoro - Custom Background</title>
     <style>
-        /* Nền dải màu gradient chuyển động rực rỡ */
+        /* Thiết lập các chủ đề nền (Theme) dạng biến CSS */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(-45deg, #ff416c, #ff4b2b, #11998e, #38ef7d);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
             display: flex; 
             justify-content: center; 
             align-items: center; 
             height: 100vh; 
             margin: 0; 
+            transition: background 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Các class tương ứng với từng loại nền */
+        body.theme-rainbow {
+            background: linear-gradient(-45deg, #ff416c, #ff4b2b, #11998e, #38ef7d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        body.theme-cyberpunk {
+            background: linear-gradient(135deg, #0f0c20 0%, #15102a 40%, #631257 100%);
+        }
+        body.theme-sunset {
+            background: linear-gradient(135deg, #f12711, #f5af19);
+        }
+        body.theme-frost {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+        }
+        body.theme-minimal {
+            background: #eef2f3;
         }
 
         @keyframes gradientBG {
@@ -24,20 +43,50 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Thẻ chứa được thiết kế dạng kính (Glassmorphism) cực kỳ bắt mắt */
+        /* --- MENU CHỌN NỀN (Nằm góc trên cùng) --- */
+        .bg-selector-container {
+            position: absolute;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        .bg-selector-container span {
+            font-size: 12px;
+            font-weight: bold;
+            color: #444;
+        }
+        .bg-select {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Thẻ chứa Pomodoro (Glassmorphism) */
         .timer-card { 
             background: rgba(255, 255, 255, 0.9); 
             padding: 40px; 
             border-radius: 25px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.5) inset; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 0 30px rgba(255,255,255,0.5) inset; 
             text-align: center; 
             max-width: 400px; 
             width: 100%; 
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
         }
 
-        /* Đổi màu chữ tiêu đề thành gradient neon */
         h1 { 
             background: linear-gradient(45deg, #ff0844, #ffb199);
             -webkit-background-clip: text;
@@ -54,10 +103,8 @@
             text-transform: uppercase; 
             letter-spacing: 2px; 
             font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
         
-        /* Cụm nút chọn chế độ đầy màu sắc */
         .mode-container { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 10px; }
         
         .mode-btn { 
@@ -78,7 +125,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        /* Màu sắc rực rỡ riêng biệt cho từng nút khi được kích hoạt */
+        /* Màu riêng của từng nút khi Active */
         .mode-btn.active#btn-pomodoro { 
             background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); 
             color: white;
@@ -97,20 +144,18 @@
             box-shadow: 0 5px 15px rgba(245, 175, 25, 0.4);
         }
         
-        /* Số đồng hồ siêu to khổng lồ và sắc nét */
         .time { 
             font-size: 80px; 
             font-weight: 900; 
-            color: #ff0844; /* Đỏ rực rỡ mặc định */
+            color: #ff0844; 
             margin: 15px 0 30px 0; 
             font-variant-numeric: tabular-nums; 
             text-shadow: 2px 4px 10px rgba(0,0,0,0.15);
             transition: color 0.4s ease;
         }
         
-        /* Nút Điều khiển chính với hiệu ứng đổi màu sặc sỡ */
         .btn-main { 
-            background: linear-gradient(45deg, #11998e, #38ef7d); /* Xanh lá rực rỡ ban đầu */
+            background: linear-gradient(45deg, #11998e, #38ef7d); 
             color: white; 
             border: none; 
             padding: 18px 30px; 
@@ -128,13 +173,24 @@
             transform: scale(1.03);
             box-shadow: 0 8px 25px rgba(56, 239, 125, 0.6);
         }
-
-        .btn-main:active {
-            transform: scale(0.98);
-        }
+        .btn-main:active { transform: scale(0.98); }
     </style>
 </head>
-<body>
+<!-- Mặc định ban đầu dùng nền Cầu vồng rực rỡ -->
+<body class="theme-rainbow">
+
+    <!-- Thanh Menu chọn hình nền -->
+    <div class="bg-selector-container">
+        <span>🖼️ Đổi nền:</span>
+        <select class="bg-select" id="bgSelect" onchange="changeBackground()">
+            <option value="theme-rainbow">🌈 Cầu vồng động</option>
+            <option value="theme-cyberpunk">🔮 Neon Tím Đêm</option>
+            <option value="theme-sunset">🌅 Cam Hoàng Hôn</option>
+            <option value="theme-frost">❄️ Xanh Băng Giá</option>
+            <option value="theme-minimal">⚪ Tối giản (Xám)</option>
+        </select>
+    </div>
+
     <div class="timer-card">
         <h1>🎯 ELF Pomodoro</h1>
         <div class="status-text" id="status">SẴN SÀNG HỌC TẬP</div>
@@ -153,6 +209,16 @@
         let timeLeft = 25 * 60;
         let timerId = null;
 
+        // Hàm xử lý đổi hình nền khi người dùng chọn menu
+        function changeBackground() {
+            const select = document.getElementById('bgSelect');
+            const selectedTheme = select.value;
+            
+            // Xóa hết các class nền cũ và gán class mới cho thẻ body
+            document.body.className = ''; 
+            document.body.classList.add(selectedTheme);
+        }
+
         function updateTimerDisplay() {
             let minutes = Math.floor(timeLeft / 60);
             let seconds = timeLeft % 60;
@@ -163,7 +229,6 @@
             clearInterval(timerId);
             timerId = null;
             
-            // Reset nút chính về trạng thái BẮT ĐẦU sặc sỡ ban đầu
             const startBtn = document.getElementById('startBtn');
             startBtn.textContent = "BẮT ĐẦU";
             startBtn.style.background = "linear-gradient(45deg, #11998e, #38ef7d)";
@@ -173,30 +238,26 @@
             document.getElementById('status').textContent = statusText;
             updateTimerDisplay();
 
-            // Loại bỏ class active của tất cả các nút
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Kích hoạt nút tương ứng
             let activeBtn = document.getElementById(`btn-${mode}`);
             activeBtn.classList.add('active');
             
-            // Thay đổi màu sắc của chữ số đồng hồ linh hoạt theo từng chế độ
             const timerDisplay = document.getElementById('timer');
             if (mode === 'pomodoro') {
-                timerDisplay.style.color = '#ff0844'; // Đỏ neon cho lúc học
+                timerDisplay.style.color = '#ff0844'; 
             } else if (mode === 'short') {
-                timerDisplay.style.color = '#0072ff'; // Xanh dương tươi mát cho nghỉ ngắn
+                timerDisplay.style.color = '#0072ff'; 
             } else {
-                timerDisplay.style.color = '#f12711'; // Cam cháy năng lượng cho nghỉ dài
+                timerDisplay.style.color = '#f12711'; 
             }
         }
 
         function toggleTimer() {
             const startBtn = document.getElementById('startBtn');
             if (timerId === null) {
-                // Đang dừng -> Bấm để Chạy (Đổi sang màu Cam Sunset rực rỡ)
                 startBtn.textContent = "TẠM DỪNG";
                 startBtn.style.background = "linear-gradient(45deg, #f12711, #f5af19)"; 
                 startBtn.style.boxShadow = "0 6px 20px rgba(245, 175, 25, 0.4)";
@@ -215,7 +276,6 @@
                     }
                 }, 1000);
             } else {
-                // Đang chạy -> Bấm để Tạm dừng (Đổi sang màu Xanh lơ / Tím mộng mơ)
                 clearInterval(timerId);
                 timerId = null;
                 startBtn.textContent = "TIẾP TỤC";
