@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎯 Pomodoro - Focus & Chill</title>
+    <title>🎯 Pomodoro - Minimal Focus & Chill</title>
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -27,48 +27,86 @@
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.2);
             z-index: 1;
-            transition: opacity 0.5s;
         }
 
-        /* --- THANH MENU ĐIỀU KHIỂN TOP (Ngôn ngữ, Hình nền) --- */
-        .top-controls {
+        /* --- NÚT 3 GẠCH Ở GÓC MÀN HÌNH --- */
+        .menu-btn-toggle {
             position: absolute;
             top: 20px;
-            left: 0; right: 0;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255,255,255,0.5);
+            font-size: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
             display: flex;
-            gap: 15px;
-            z-index: 10;
-            flex-wrap: wrap;
             justify-content: center;
-            transition: opacity 0.5s;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            color: #2c3e50;
+        }
+        .menu-btn-toggle:hover {
+            transform: scale(1.05);
+            background: #ffffff;
         }
 
-        /* Ẩn menu top khi đang chạy timer */
-        body.is-running .top-controls {
+        /* --- KHUNG MENU THẢ XUỐNG --- */
+        .top-controls {
+            position: absolute;
+            top: 75px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 99;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 18px 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.6);
+            min-width: 230px;
+            
+            /* Hiệu ứng ẩn/hiện menu */
             opacity: 0;
+            transform: translateY(-10px);
             pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .top-controls.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Ẩn hoàn toàn menu và nút 3 gạch khi đang chạy timer */
+        body.is-running .menu-btn-toggle,
+        body.is-running .top-controls {
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         .control-group {
-            background: rgba(255, 255, 255, 0.85);
-            padding: 8px 18px;
-            border-radius: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
             display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid rgba(255,255,255,0.5);
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
         }
 
-        .control-group span { font-size: 13px; font-weight: bold; color: #2c3e50; }
+        .control-group span { font-size: 12px; font-weight: bold; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .custom-select {
-            background: #ffffff; border: 1px solid #e0e0e0; padding: 6px 12px;
-            border-radius: 20px; font-size: 13px; font-weight: bold; color: #495057;
+            background: #ffffff; border: 1px solid #e0e0e0; padding: 8px 12px;
+            border-radius: 12px; font-size: 13px; font-weight: bold; color: #34495e;
             cursor: pointer; outline: none; transition: all 0.3s;
+            width: 100%;
         }
-        .custom-select:hover { background: #f1f3f5; }
+        .custom-select:hover { background: #f8f9fa; border-color: #b2bec3; }
 
         /* --- THẺ CHỨA POMODORO CHÍNH --- */
         .timer-card { 
@@ -87,7 +125,7 @@
             transition: all 0.6s cubic-bezier(0.25, 1, 0.3, 1);
         }
 
-        /* TRẠNG THÁI KHI ĐANG ĐẾM GIỜ (BẤM BẮT ĐẦU) */
+        /* TRẠNG THÁI KHI ĐANG ĐẾM GIỜ (Biến mất nền trắng) */
         .timer-card.running {
             background: transparent;
             box-shadow: none;
@@ -96,14 +134,13 @@
             -webkit-backdrop-filter: none;
         }
 
-        /* Ẩn các phần tử không cần thiết khi chạy */
+        /* Ẩn các phần tử phụ khi chạy */
         .hide-on-run {
             transition: all 0.5s cubic-bezier(0.25, 1, 0.3, 1);
             max-height: 500px;
             opacity: 1;
             overflow: hidden;
         }
-
         .timer-card.running .hide-on-run {
             max-height: 0;
             opacity: 0;
@@ -112,86 +149,87 @@
             pointer-events: none;
         }
 
-        /* Vùng hiển thị thời gian khi chạy sẽ MỜ ĐI */
+        /* Vùng hiển thị thời gian khi chạy sẽ cực kỳ MỜ NHẠT */
         .running-elements {
             transition: all 0.5s ease;
             opacity: 1;
-            transform: scale(1);
         }
-
         .timer-card.running .running-elements {
-            opacity: 0.45; /* Làm mờ khung thời gian đi */
-            transform: scale(1.1); /* Hơi phóng to lên một chút */
+            opacity: 0.35; /* Làm mờ hẳn chữ thời gian xuống để nhìn nền */
         }
-        
-        /* Khi di chuột vào thì sáng lên để dễ bấm nút */
+        /* Khi di chuột vào khu vực giữa màn hình sẽ sáng rõ lại để tương tác */
         .timer-card.running .running-elements:hover {
             opacity: 1;
         }
 
-        /* Các phần tử Text & Nút bấm cơ bản */
+        /* Các phần tử văn bản */
         h1 { 
-            background: linear-gradient(45deg, #ff4e50, #f9d423);
+            background: linear-gradient(45deg, #ff7675, #ffeaa7);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             font-size: 26px; margin-top: 0; margin-bottom: 5px; font-weight: 800;
         }
-        .status-text { color: #e74c3c; font-size: 12px; margin-bottom: 15px; font-weight: bold; letter-spacing: 2px;}
+        .status-text { color: #ff7675; font-size: 12px; margin-bottom: 15px; font-weight: bold; letter-spacing: 2px;}
         
         .mode-container { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 8px;}
         .mode-btn { 
-            background-color: rgba(0,0,0,0.06); border: none; padding: 12px 5px; 
+            background-color: rgba(0,0,0,0.05); border: none; padding: 12px 5px; 
             font-size: 12px; font-weight: bold; border-radius: 12px; cursor: pointer; 
-            color: #4a4a4a; transition: all 0.3s ease; flex: 1; 
+            color: #57606f; transition: all 0.3s ease; flex: 1; 
         }
-        .mode-btn:hover { background-color: rgba(0,0,0,0.1); }
-        .mode-btn.active#btn-pomodoro { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; box-shadow: 0 4px 10px rgba(255,65,108,0.3); } 
-        .mode-btn.active#btn-short { background: linear-gradient(135deg, #00c6ff, #0072ff); color: white; box-shadow: 0 4px 10px rgba(0,114,255,0.3); }
-        .mode-btn.active#btn-long { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; box-shadow: 0 4px 10px rgba(56,239,125,0.3); }
+        .mode-btn:hover { background-color: rgba(0,0,0,0.09); }
+        .mode-btn.active#btn-pomodoro { background: linear-gradient(135deg, #ff7675, #ffaba7); color: white; box-shadow: 0 4px 10px rgba(255,118,117,0.3); } 
+        .mode-btn.active#btn-short { background: linear-gradient(135deg, #74b9ff, #a8d2ff); color: white; box-shadow: 0 4px 10px rgba(116,185,255,0.3); }
+        .mode-btn.active#btn-long { background: linear-gradient(135deg, #55efc4, #96ffe3); color: white; box-shadow: 0 4px 10px rgba(85,239,196,0.3); }
         
-        /* CÀI ĐẶT INLINE (Hiển thị ngay trong thẻ) */
+        /* CÀI ĐẶT INLINE */
         .settings-toggle-btn {
-            background: none; border: none; font-size: 13px; color: #7f8c8d; font-weight: bold;
+            background: none; border: none; font-size: 13px; color: #a4b0be; font-weight: bold;
             cursor: pointer; margin-bottom: 15px; transition: color 0.2s; text-decoration: underline;
         }
-        .settings-toggle-btn:hover { color: #2c3e50; }
+        .settings-toggle-btn:hover { color: #57606f; }
 
         .settings-panel {
-            background: rgba(255,255,255,0.6); padding: 15px; border-radius: 15px; margin-bottom: 20px;
-            display: none; /* Mặc định ẩn, bấm nút mới hiện */
-            border: 1px solid rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.03); padding: 15px; border-radius: 15px; margin-bottom: 20px;
+            display: none; border: 1px solid rgba(0,0,0,0.05);
         }
         .settings-panel.open { display: block; }
         
         .input-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .input-group label { font-weight: bold; color: #495057; font-size: 13px; }
+        .input-group label { font-weight: bold; color: #57606f; font-size: 13px; }
         .input-group input { width: 50px; padding: 6px; border-radius: 8px; border: 1px solid #ced4da; text-align: center; font-weight: bold; outline: none; }
-        .input-group input:focus { border-color: #ff416c; }
-        .btn-save { background: #2c3e50; color: white; border: none; padding: 8px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px;}
-        .btn-save:hover { background: #1a252f; }
+        .input-group input:focus { border-color: #ff7675; }
+        
+        .btn-save { background: #57606f; color: white; border: none; padding: 8px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px;}
+        .btn-save:hover { background: #2f3542; }
 
-        /* THỜI GIAN VÀ NÚT CHÍNH */
+        /* SỐ PHÚT ĐẾM GIỜ (Màu pastel nhạt thanh lịch) */
         .time { 
-            font-size: 80px; font-weight: 900; color: #ff416c; 
+            font-size: 84px; font-weight: 800; 
+            color: #ff7675; /* Mặc định là hồng san hô nhạt */
             margin: 0 0 20px 0; font-variant-numeric: tabular-nums; 
-            text-shadow: 2px 4px 12px rgba(0,0,0,0.12);
+            text-shadow: 1px 2px 8px rgba(0,0,0,0.08);
             transition: color 0.4s ease;
+            letter-spacing: -1px;
         }
         
         .btn-main { 
-            background: linear-gradient(45deg, #ff4e50, #f9d423); color: white; border: none; 
+            background: linear-gradient(45deg, #ff7675, #ffeaa7); color: white; border: none; 
             padding: 16px 30px; font-size: 18px; border-radius: 50px; cursor: pointer; 
             transition: all 0.3s ease; width: 100%; font-weight: bold; letter-spacing: 1px;
-            box-shadow: 0 6px 20px rgba(255, 78, 80, 0.4);
+            box-shadow: 0 6px 20px rgba(255, 118, 117, 0.3);
         }
-        .btn-main:hover { transform: scale(1.03); box-shadow: 0 8px 25px rgba(255, 78, 80, 0.55); }
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(255, 118, 117, 0.45); }
     </style>
 </head>
 <body>
 
-    <!-- Khung Menu Điều Khiển Top (Sẽ biến mất khi chạy) -->
-    <div class="top-controls">
+    <!-- Nút 3 gạch menu ở góc màn hình -->
+    <button class="menu-btn-toggle" onclick="toggleTopMenu(event)">☰</button>
+
+    <!-- Khung cài đặt thả xuống từ góc phải -->
+    <div class="top-controls" id="topControls">
         <div class="control-group">
-            <span id="label-lang">🌐 Ngôn ngữ:</span>
+            <span id="label-lang">🌐 Ngôn ngữ / Language:</span>
             <select class="custom-select" id="langSelect" onchange="changeLanguage()">
                 <option value="vi">Tiếng Việt</option>
                 <option value="en">English</option>
@@ -199,7 +237,7 @@
         </div>
 
         <div class="control-group">
-            <span id="label-bg">🌍 Hình nền:</span>
+            <span id="label-bg">🌍 Hình nền / Background:</span>
             <select class="custom-select" id="bgSelect" onchange="changeBackground()">
                 <option value="anime_room" id="opt-anime-room">📖 Phòng học Anime</option>
                 <option value="anime_sakura" id="opt-anime-sakura">🌸 Anime Hoa Anh Đào</option>
@@ -211,22 +249,21 @@
         </div>
     </div>
 
-    <!-- Thẻ Đếm Giờ Ở Giữa -->
+    <!-- Thẻ Đếm Giờ Trung Tâm -->
     <div class="timer-card" id="timerCard">
         
-        <!-- Phần này sẽ ẨN ĐI khi bấm BẮT ĐẦU -->
+        <!-- Khối này sẽ ẩn đi hoàn toàn khi chạy đếm giờ -->
         <div class="hide-on-run">
             <h1 id="app-title">🎯 ELF Pomodoro</h1>
             <div class="status-text" id="status">SẴN SÀNG HỌC TẬP</div>
             
-            <!-- Nút chọn Tab -->
             <div class="mode-container">
                 <button class="mode-btn active" id="btn-pomodoro" onclick="setMode('pomodoro')">25m Học</button>
                 <button class="mode-btn" id="btn-short" onclick="setMode('short')">5m Nghỉ</button>
                 <button class="mode-btn" id="btn-long" onclick="setMode('long')">15m Nghỉ</button>
             </div>
 
-            <!-- Mở Menu Cài đặt ngay trong thẻ -->
+            <!-- Nút mở tùy chỉnh thời gian trực tiếp -->
             <button class="settings-toggle-btn" id="btn-settings-toggle" onclick="toggleSettingsPanel()">⚙️ Cài đặt thời gian</button>
             
             <div class="settings-panel" id="settingsPanel">
@@ -246,7 +283,7 @@
             </div>
         </div>
 
-        <!-- Phần này SẼ MỜ ĐI nhưng VẪN HIỂN THỊ Ở GIỮA khi bấm BẮT ĐẦU -->
+        <!-- Khối đếm giờ chính: Sẽ mờ đi và giữ vị trí trung tâm màn hình khi đếm -->
         <div class="running-elements">
             <div class="time" id="timer">25:00</div>
             <button class="btn-main" id="startBtn" onclick="toggleTimer()">BẮT ĐẦU</button>
@@ -255,7 +292,7 @@
     </div>
 
     <script>
-        // --- NGÔN NGỮ ---
+        // --- TỪ ĐIỂN ĐA NGÔN NGỮ ---
         const i18n = {
             vi: {
                 labelLang: "🌐 Ngôn ngữ:", labelBg: "🌍 Hình nền:", appTitle: "🎯 ELF Pomodoro",
@@ -290,17 +327,39 @@
             halong_bay: "url('https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1920&auto=format&fit=crop')"
         };
 
+        // BẢNG MÀU PASTEL NHẠT DIỆU MẮT
+        const colors = {
+            pomodoro: '#ff7675', // Hồng san hô nhạt
+            short: '#74b9ff',    // Xanh dương mây nhạt
+            long: '#55efc4'     // Xanh mint nhạt
+        };
+
         let times = { pomodoro: 25, short: 5, long: 15 };
         let timeLeft = times.pomodoro * 60;
         let timerId = null;
         let currentMode = 'pomodoro'; 
-        let timerState = 'idle'; // idle, running, paused
+        let timerState = 'idle'; 
         let currentLang = 'vi';
 
         window.onload = function() {
             changeBackground();
             updateText();
+            
+            // Đóng menu thả xuống nếu click ra vùng ngoài
+            document.addEventListener('click', function(e) {
+                const controls = document.getElementById('topControls');
+                const toggleBtn = document.querySelector('.menu-btn-toggle');
+                if (!controls.contains(e.target) && e.target !== toggleBtn) {
+                    controls.classList.remove('open');
+                }
+            });
         };
+
+        // Điều khiển ẩn hiện Menu 3 gạch
+        function toggleTopMenu(event) {
+            event.stopPropagation();
+            document.getElementById('topControls').classList.toggle('open');
+        }
 
         function changeBackground() {
             document.body.style.backgroundImage = backgrounds[document.getElementById('bgSelect').value];
@@ -344,7 +403,7 @@
             else if (timerState === 'paused') startBtn.textContent = t.btnResume;
         }
 
-        // --- CÀI ĐẶT THỜI GIAN ---
+        // --- CÀI ĐẶT THỜI GIAN INLINE ---
         function toggleSettingsPanel() {
             document.getElementById('settingsPanel').classList.toggle('open');
         }
@@ -369,7 +428,6 @@
         function setMode(mode) {
             clearInterval(timerId); timerId = null; timerState = 'idle'; currentMode = mode;
             
-            // Xóa trạng thái đang chạy (hiện lại background thẻ)
             document.getElementById('timerCard').classList.remove('running');
             document.body.classList.remove('is-running');
 
@@ -379,18 +437,16 @@
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`btn-${mode}`).classList.add('active');
             
-            const timerDisplay = document.getElementById('timer');
-            if (mode === 'pomodoro') timerDisplay.style.color = '#ff416c'; 
-            else if (mode === 'short') timerDisplay.style.color = '#0072ff'; 
-            else timerDisplay.style.color = '#11998e'; 
+            // Đổi màu chữ theo mã màu Pastel dịu nhạt tương ứng
+            document.getElementById('timer').style.color = colors[mode]; 
             
             resetStartButton();
         }
 
         function resetStartButton() {
             const startBtn = document.getElementById('startBtn');
-            startBtn.style.background = "linear-gradient(45deg, #ff4e50, #f9d423)";
-            startBtn.style.boxShadow = "0 6px 20px rgba(255, 78, 80, 0.4)";
+            startBtn.style.background = "linear-gradient(45deg, #ff7675, #ffeaa7)";
+            startBtn.style.boxShadow = "0 6px 20px rgba(255, 118, 117, 0.3)";
         }
 
         function toggleTimer() {
@@ -399,20 +455,18 @@
             const t = i18n[currentLang];
 
             if (timerState === 'idle' || timerState === 'paused') {
-                // KHI BẤM CHẠY -> ẨN HẾT, CHỈ ĐỂ LẠI TIME MỜ
                 timerState = 'running';
                 card.classList.add('running');
-                document.body.classList.add('is-running'); // Ẩn menu top
+                document.body.classList.add('is-running'); // Kích hoạt trạng thái ẩn menu góc
 
                 startBtn.textContent = t.btnPause;
-                startBtn.style.background = "linear-gradient(45deg, #e65c00, #f9d423)"; 
+                startBtn.style.background = "linear-gradient(45deg, #e17055, #ffeaa7)"; 
                 startBtn.style.boxShadow = "none";
                 
                 timerId = setInterval(() => {
                     if (timeLeft > 0) { 
                         timeLeft--; updateTimerDisplay(); 
                     } else { 
-                        // HẾT GIỜ
                         clearInterval(timerId); timerId = null; timerState = 'idle';
                         card.classList.remove('running');
                         document.body.classList.remove('is-running');
@@ -422,14 +476,13 @@
                     }
                 }, 1000);
             } else {
-                // KHI BẤM TẠM DỪNG -> HIỆN LẠI BÌNH THƯỜNG
                 clearInterval(timerId); timerState = 'paused';
                 card.classList.remove('running');
                 document.body.classList.remove('is-running');
 
                 startBtn.textContent = t.btnResume;
-                startBtn.style.background = "linear-gradient(45deg, #8a2387, #e94057, #f27121)"; 
-                startBtn.style.boxShadow = "0 6px 20px rgba(233, 64, 87, 0.4)";
+                startBtn.style.background = "linear-gradient(45deg, #a4b0be, #74b9ff)"; 
+                startBtn.style.boxShadow = "0 6px 20px rgba(116, 185, 255, 0.3)";
             }
         }
     </script>
